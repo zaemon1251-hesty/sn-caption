@@ -232,6 +232,8 @@ if __name__ == '__main__':
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
 
+    args.weights_encoder = f"models/{args.model_name}/caption/model.pth.tar" if args.pretrain else None
+
     numeric_level = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % args.loglevel)

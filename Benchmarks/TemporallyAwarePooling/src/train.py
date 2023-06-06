@@ -72,7 +72,7 @@ def trainer(phase, train_loader,
 
             logging.info("Validation performance at epoch " +
                          str(epoch+1) + " -> " + str(performance_validation))
-            
+
             wandb.log({**{
                 f"loss_train_{phase}": loss_training,
                 f"loss_val_{phase}": loss_validation,
@@ -141,7 +141,7 @@ def train(phase, dataloader, model, criterion, optimizer, epoch, train=False):
                 loss = criterion(output[mask], target[mask])
             else:
                 NotImplementedError()
-            
+
             # measure accuracy and record loss
             losses.update(loss.item(), feats.size(0))
 
@@ -209,11 +209,11 @@ def validate_spotting(dataloader, model, model_name):
     return {"mAP-sklearn" : mAP}
 
 def test_spotting(dataloader, model, model_name, save_predictions=True, NMS_window=30, NMS_threshold=0.5):
-    
+
     split = '_'.join(dataloader.dataset.split)
     output_folder = f"outputs/{split}"
     output_results = os.path.join("models", model_name, output_folder)
-    
+
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -320,36 +320,36 @@ def test_spotting(dataloader, model, model_name, save_predictions=True, NMS_wind
                         prediction_data["half"] = str(half+1)
                         prediction_data["confidence"] = str(confidence)
                         json_data["predictions"].append(prediction_data)
-            
+
             json_data["predictions"] = sorted(json_data["predictions"], key=lambda x: (int(x["half"]), int(x["position"])))
             if save_predictions:
                 os.makedirs(os.path.join("models", model_name, output_folder, game_ID), exist_ok=True)
                 with open(os.path.join("models", model_name, output_folder, game_ID, "results_spotting.json"), 'w') as output_file:
                     json.dump(json_data, output_file, indent=4)
 
-    if split == "challenge": 
+    if split == "challenge":
         print("Visit eval.ai to evalaute performances on Challenge set")
         return None
-    
-    tight = evaluate_spotting(SoccerNet_path=dataloader.dataset.path, 
+
+    tight = evaluate_spotting(SoccerNet_path=dataloader.dataset.path,
                 Predictions_path=output_results,
                 split=dataloader.dataset.split,
-                prediction_file="results_spotting.json", 
-                version=dataloader.dataset.version, 
+                prediction_file="results_spotting.json",
+                version=dataloader.dataset.version,
                 framerate=dataloader.dataset.framerate, metric="tight")
-    
-    loose = evaluate_spotting(SoccerNet_path=dataloader.dataset.path, 
+
+    loose = evaluate_spotting(SoccerNet_path=dataloader.dataset.path,
                 Predictions_path=output_results,
                 split=dataloader.dataset.split,
-                prediction_file="results_spotting.json", 
-                version=dataloader.dataset.version, 
+                prediction_file="results_spotting.json",
+                version=dataloader.dataset.version,
                 framerate=dataloader.dataset.framerate, metric="loose")
-    
-    medium = evaluate_spotting(SoccerNet_path=dataloader.dataset.path, 
+
+    medium = evaluate_spotting(SoccerNet_path=dataloader.dataset.path,
                 Predictions_path=output_results,
                 split=dataloader.dataset.split,
-                prediction_file="results_spotting.json", 
-                version=dataloader.dataset.version, 
+                prediction_file="results_spotting.json",
+                version=dataloader.dataset.version,
                 framerate=dataloader.dataset.framerate, metric="medium")
 
     tight = {f"{k}_tight" : v for k, v in tight.items() if v!= None}
@@ -369,7 +369,7 @@ def validate_captioning(dataloader, model, model_name):
     end = time.time()
     all_labels = []
     all_outputs = []
-    
+
     with tqdm(dataloader) as t:
         for (feats, caption), lengths, mask, caption_or, cap_id in t:
             # measure data loading time
@@ -377,7 +377,7 @@ def validate_captioning(dataloader, model, model_name):
             feats = feats.cuda()
             #compute output string
             output = [dataloader.dataset.detokenize(list(model.sample(feats[idx]).detach().cpu())) for idx in range(feats.shape[0])]
-            
+
             all_outputs.extend(output)
             all_labels.extend(caption_or)
 
@@ -414,7 +414,7 @@ def test_captioning(dataloader, model, model_name, output_filename = "results_de
             data_time.update(time.time() - end)
             feats = feats.cuda()
             output = [dataloader.dataset.detokenize(list(model.sample(feats[idx]).detach().cpu())) for idx in range(feats.shape[0])]
-            
+
             all_outputs.extend(output)
             all_index.extend([(i.item(), j.item()) for i, j in zip(game_id, cap_id)])
 
@@ -427,7 +427,7 @@ def test_captioning(dataloader, model, model_name, output_filename = "results_de
             desc += f'Data:{data_time.avg:.3f}s '
             desc += f'(it:{data_time.val:.3f}s) '
             t.set_description(desc)
-    
+
     #store output
     captions = dict(zip(all_index, all_outputs))
     for game_id, game in enumerate(dataloader.dataset.listGames):
@@ -438,8 +438,8 @@ def test_captioning(dataloader, model, model_name, output_filename = "results_de
             annotation["comment"] = captions[game_id, caption_id]
         with open(os.path.join("models", model_name, output_folder, game, output_filename), 'w') as output_file:
                     json.dump(preds, output_file, indent=4)
-    
-    def zipResults(zip_path, target_dir, filename="results_spotting.json"):            
+
+    def zipResults(zip_path, target_dir, filename="results_spotting.json"):
             zipobj = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
             rootlen = len(target_dir) + 1
             for base, dirs, files in os.walk(target_dir):
@@ -447,15 +447,15 @@ def test_captioning(dataloader, model, model_name, output_filename = "results_de
                     if file == filename:
                         fn = os.path.join(base, file)
                         zipobj.write(fn, fn[rootlen:])
-    
+
     zipResults(zip_path = output_results,
             target_dir = os.path.join("models", model_name, output_folder),
             filename=output_filename)
 
-    if split == "challenge": 
+    if split == "challenge":
         print("Visit eval.ai to evalaute performances on Challenge set")
         return None
-    
+
     tight = evaluate_dvc(SoccerNet_path=dataloader.dataset.path, Predictions_path=output_results, split=dataloader.dataset.split, version=dataloader.dataset.version, prediction_file=output_filename, window_size=5, include_SODA=False)
     loose = evaluate_dvc(SoccerNet_path=dataloader.dataset.path, Predictions_path=output_results, split=dataloader.dataset.split, version=dataloader.dataset.version, prediction_file=output_filename, window_size=30, include_SODA=False)
 
