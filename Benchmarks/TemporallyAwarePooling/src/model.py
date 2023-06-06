@@ -26,9 +26,9 @@ class VideoEncoder(nn.Module):
         self.framerate = framerate
         self.pool = pool
         self.vlad_k = vlad_k
-        
+
         # are feature alread PCA'ed?
-        if not self.input_size == 512:   
+        if not self.input_size == 512:
             self.feature_extractor = nn.Linear(self.input_size, 512)
             input_size = 512
             self.input_size = 512
@@ -96,9 +96,9 @@ class VideoEncoder(nn.Module):
             inputs_pooled = self.pool_layer(inputs.permute((0, 2, 1))).squeeze(-1)
 
         elif self.pool == "MAX++" or self.pool == "AVG++":
-            nb_frames_50 = int(inputs.shape[1]/2)    
-            input_before = inputs[:, :nb_frames_50, :]        
-            input_after = inputs[:, nb_frames_50:, :]  
+            nb_frames_50 = int(inputs.shape[1]/2)
+            input_before = inputs[:, :nb_frames_50, :]
+            input_after = inputs[:, nb_frames_50:, :]
             inputs_before_pooled = self.pool_layer_before(input_before.permute((0, 2, 1))).squeeze(-1)
             inputs_after_pooled = self.pool_layer_after(input_after.permute((0, 2, 1))).squeeze(-1)
             inputs_pooled = torch.cat((inputs_before_pooled, inputs_after_pooled), dim=1)
@@ -126,7 +126,7 @@ class DecoderRNN(nn.Module):
         self.dropout = nn.Dropout(0.4)
         self.activation = nn.ReLU()
         self.num_layers = num_layers
-    
+
     def forward(self, features, captions, lengths):
         #Features extraction of video encoder
         features = self.ft_extactor_2(self.activation(self.dropout(self.ft_extactor_1(features))))
@@ -139,7 +139,7 @@ class DecoderRNN(nn.Module):
         hiddens, _ = self.lstm(captions, (features, features))
         outputs = self.fc(hiddens[0])
         return outputs
-    
+
     def sample(self, features, max_seq_length):
         sampled_ids = []
         #Features extraction of video encoder
@@ -153,7 +153,7 @@ class DecoderRNN(nn.Module):
         inputs = self.embed(inputs)
         #Sample at most max_seq_length token
         for i in range(max_seq_length):
-            hiddens, states = self.lstm(inputs, states) 
+            hiddens, states = self.lstm(inputs, states)
             outputs = self.fc(hiddens.squeeze(1))
             #Sample the most likely word
             _, predicted = outputs.max(1)
@@ -182,7 +182,7 @@ class Video2Caption(nn.Module):
             self.load_state_dict(checkpoint['state_dict'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(weights, checkpoint['epoch']))
-            
+
     def load_encoder(self, weights_encoder=None, freeze_encoder=False):
         if(weights_encoder is not None):
             print("=> loading encoder '{}'".format(weights_encoder))
@@ -190,11 +190,11 @@ class Video2Caption(nn.Module):
             self.load_state_dict({k :v for k, v in checkpoint['state_dict'].items() if "encoder." in k}, strict=False)
             print("=> loaded checencoderkpoint '{}' (epoch {})"
                   .format(weights_encoder, checkpoint['epoch']))
-            
+
             if freeze_encoder:
                 for param in self.encoder.parameters():
                     param.requires_grad = False
-    
+
     def forward(self, features, captions, lengths):
         features = self.encoder(features)
         batch_size = captions.size(0)
@@ -216,7 +216,7 @@ class Video2Caption(nn.Module):
                 decoder_input = topi.detach()  # detach from history as input
             decoder_output = pack_padded_sequence(decoder_output, lengths, batch_first=True, enforce_sorted=False)[0]
         return decoder_output
-    
+
     def sample(self, features, max_seq_length=70):
         features = self.encoder(features.unsqueeze(0))
         return self.decoder.sample(features, max_seq_length)
@@ -243,7 +243,7 @@ class Video2Spot(nn.Module):
             self.load_state_dict(checkpoint['state_dict'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(weights, checkpoint['epoch']))
-    
+
     def load_encoder(self, weights_encoder=None, freeze_encoder=False):
         if(weights_encoder is not None):
             print("=> loading encoder '{}'".format(weights_encoder))
@@ -251,7 +251,7 @@ class Video2Spot(nn.Module):
             self.load_state_dict({k :v for k, v in checkpoint['state_dict'].items() if "encoder." in k}, strict=False)
             print("=> loaded checencoderkpoint '{}' (epoch {})"
                   .format(weights_encoder, checkpoint['epoch']))
-            
+
             if freeze_encoder:
                 for param in self.encoder.parameters():
                     param.requires_grad = False
