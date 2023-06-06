@@ -16,17 +16,23 @@ from utils import valid_probability
 import wandb
 
 
-def main(args):
+def main(rank, world_size, args):
 
     logging.info("Parameters:")
     for arg in vars(args):
         logging.info(arg.rjust(15) + " : " + str(getattr(args, arg)))
+
+    torch.distributed.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
 
     # create dataset
     if not args.test_only:
         dataset_Train = SoccerNetCaptions(path=args.SoccerNet_path, features=args.features, split=args.split_train, version=args.version, framerate=args.framerate, window_size=args.window_size_caption)
         dataset_Valid = SoccerNetCaptions(path=args.SoccerNet_path, features=args.features, split=args.split_valid, version=args.version, framerate=args.framerate, window_size=args.window_size_caption)
         dataset_Valid_metric  = SoccerNetCaptions(path=args.SoccerNet_path, features=args.features, split=args.split_valid, version=args.version, framerate=args.framerate, window_size=args.window_size_caption)
+        sampler_Train = torch.utils.data.distributed.DistributedSampler(dataset_Train, rank=rank)
+        sampler_Valid = torch.utils.data.distributed.DistributedSampler(dataset_Valid, rank=rank)
+        sampler_Valid_metric = torch.utils.data.distributed.DistributedSampler(dataset_Valid_metric, rank=rank)
+
     dataset_Test  = SoccerNetCaptions(path=args.SoccerNet_path, features=args.features, split=args.split_test, version=args.version, framerate=args.framerate, window_size=args.window_size_caption)
 
     if args.feature_dim is None:
@@ -34,12 +40,15 @@ def main(args):
         print("feature_dim found:", args.feature_dim)
     # create model
     model = Video2Caption(vocab_size=dataset_Test.vocab_size, weights=args.load_weights, input_size=args.feature_dim,
-                  window_size=args.window_size_caption, 
+                  window_size=args.window_size_caption,
                   vlad_k = args.vlad_k,
                   framerate=args.framerate,
                   pool=args.pool,
                   num_layers=args.num_layers,
-                  teacher_forcing_ratio=args.teacher_forcing_ratio, freeze_encoder=args.freeze_encoder, weights_encoder=args.weights_encoder).cuda()
+                  teacher_forcing_ratio=args.teacher_forcing_ratio, freeze_encoder=args.freeze_encoder, weights_encoder=args.weights_encoder) # .cuda()
+
+    model = torch.nn.parallel.DistributedDataParallel(model.to(rank), device_ids=[rank])
+
     logging.info(model)
     total_params = sum(p.numel()
                        for p in model.parameters() if p.requires_grad)
@@ -49,32 +58,32 @@ def main(args):
     # create dataloader
     if not args.test_only:
         train_loader = torch.utils.data.DataLoader(dataset_Train,
-            batch_size=args.batch_size, shuffle=True,
+            batch_size=args.batch_size * torch.cuda.device_count(), shuffle=True,
             num_workers=args.max_num_worker, pin_memory=True, collate_fn=collate_fn_padd)
 
         val_loader = torch.utils.data.DataLoader(dataset_Valid,
-            batch_size=args.batch_size, shuffle=False,
+            batch_size=args.batch_size * torch.cuda.device_count(), shuffle=False,
             num_workers=args.max_num_worker, pin_memory=True, collate_fn=collate_fn_padd)
 
         val_metric_loader = torch.utils.data.DataLoader(dataset_Valid_metric,
-            batch_size=args.batch_size, shuffle=False,
+            batch_size=args.batch_size * torch.cuda.device_count(), shuffle=False,
             num_workers=args.max_num_worker, pin_memory=True, collate_fn=collate_fn_padd)
 
 
     # training parameters
     if not args.test_only:
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.LR, 
-                                    betas=(0.9, 0.999), eps=1e-08, 
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.LR,
+                                    betas=(0.9, 0.999), eps=1e-08,
                                     weight_decay=0, amsgrad=False)
 
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True, patience=args.patience)
 
         # start training
-        trainer("caption", train_loader, val_loader, val_metric_loader, 
-                model, optimizer, scheduler, criterion,
-                model_name=args.model_name,
+        trainer("caption", train_loader, val_loader, val_metric_loader,
+                model, optimizer, scheduler, criterion, [sampler_Train, sampler_Valid, sampler_Valid_metric],
+                model_name=args.model_name,rank=rank,
                 max_epochs=args.max_epochs, evaluation_frequency=args.evaluation_frequency)
 
     # For the best model only
@@ -111,10 +120,10 @@ def main(args):
         logging.info(f'| ROUGE_L: {results["ROUGE_L"]}')
         logging.info(f'| CIDEr: {results["CIDEr"]}')
 
-        wandb.log({f"{k}_{split}_gt" : v for k, v in results.items()})
+        # wandb.log({f"{k}_{split}_gt" : v for k, v in results.items()})
 
 
-    return 
+    return
 
 def dvc(args):
 
@@ -129,7 +138,7 @@ def dvc(args):
         print("feature_dim found:", args.feature_dim)
     # create model
     model = Video2Caption(vocab_size=dataset_Test.vocab_size, weights=args.load_weights, input_size=args.feature_dim,
-                  window_size=args.window_size_caption, 
+                  window_size=args.window_size_caption,
                   vlad_k = args.vlad_k,
                   framerate=args.framerate,
                   pool=args.pool,
@@ -149,6 +158,11 @@ def dvc(args):
     # generate dense caption on multiple splits [test/challenge]
     for split in args.split_test:
         PredictionPath = os.path.join("models", args.model_name, f"outputs/{split}")
+
+        del dataset_Test
+        import gc
+        gc.collect()
+
         dataset_Test  = PredictionCaptions(SoccerNetPath=args.SoccerNet_path, PredictionPath=PredictionPath, features=args.features, split=[split], version=args.version, framerate=args.framerate, window_size=args.window_size_caption)
 
         test_loader = torch.utils.data.DataLoader(dataset_Test,
@@ -207,7 +221,7 @@ if __name__ == '__main__':
     parser.add_argument('--pool',       required=False, type=str,   default="NetVLAD++", help='How to pool' )
     parser.add_argument('--vlad_k',       required=False, type=int,   default=64, help='Size of the vocabulary for NetVLAD' )
     parser.add_argument('--min_freq',       required=False, type=int,   default=5, help='Minimum word frequency to the vocabulary for caption generation' )
-    
+
     parser.add_argument('--teacher_forcing_ratio',  required=False, type=valid_probability,   default=1, help='Teacher forcing ratio to use' )
     parser.add_argument('--num_layers',  required=False, type=int,   default=2, help='Teacher forcing ratio to use' )
     parser.add_argument('--freeze_encoder',  required=False, type=bool, default=False)
@@ -220,7 +234,7 @@ if __name__ == '__main__':
     parser.add_argument('--LRe',       required=False, type=float,   default=1e-06, help='Learning Rate end' )
     parser.add_argument('--patience', required=False, type=int,   default=10,     help='Patience before reducing LR (ReduceLROnPlateau)' )
 
-    parser.add_argument('--GPU',        required=False, type=int,   default=-1,     help='ID of the GPU to use' )
+    parser.add_argument('--GPU',        required=False, type=str,   default="-1",     help='IDs of the GPU to use' )
     parser.add_argument('--max_num_worker',   required=False, type=int,   default=4, help='number of worker to load data')
     parser.add_argument('--seed',   required=False, type=int,   default=0, help='seed for reproducibility')
 
@@ -240,12 +254,12 @@ if __name__ == '__main__':
     log_path = os.path.join("models", args.model_name,
                             datetime.now().strftime('%Y-%m-%d_%H-%M-%S.log'))
 
-    run = wandb.init(
-    project="NetVLAD-caption",
-    name=args.model_name
-    )
-
-    wandb.config.update(args)
+    # run = wandb.init(
+    # project="NetVLAD-caption",
+    # name=args.model_name
+    # )
+    #
+    # wandb.config.update(args)
 
     logging.basicConfig(
         level=numeric_level,
@@ -256,12 +270,22 @@ if __name__ == '__main__':
             logging.StreamHandler()
         ])
 
-    if args.GPU >= 0:
-        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
+    # if args.GPU != "-1":
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    #     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
 
+
+    # Multi GPU(DDP)
+    import os
+    import torch.multiprocessing as mp
+
+
+    rank = int(os.environ['LOCAL_RANK'])
+    torch.cuda.set_device(rank)
+    world_size = torch.cuda.device_count()
+    logging.info(f'World size is {world_size}')
 
     start=time.time()
     logging.info('Starting main function')
-    main(args)
+    mp.spawn(main, nprocs=world_size, args=(rank, world_size, args))
     logging.info(f'Total Execution Time is {time.time()-start} seconds')
