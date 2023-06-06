@@ -73,7 +73,7 @@ def main(rank, world_size, args):
     # training parameters
     if not args.test_only:
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.LR,
+        optimizer = torch.optim.Adam(model.module.parameters(), lr=args.LR,
                                     betas=(0.9, 0.999), eps=1e-08,
                                     weight_decay=0, amsgrad=False)
 
@@ -88,8 +88,8 @@ def main(rank, world_size, args):
 
     # For the best model only
     checkpoint = torch.load(os.path.join("models", args.model_name, "caption","model.pth.tar"))
-    model.load_state_dict(checkpoint['state_dict'])
-    model = model.cuda()
+    model.module.load_state_dict(checkpoint['state_dict'])
+    model = model.cuda(rank)
 
     # validate caption generation on groundtruth spots on multiple splits [test/challenge]
     for split in args.split_test:
