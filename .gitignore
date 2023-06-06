@@ -1,0 +1,7 @@
+wandb
+**/__pycache__
+*.log
+SoccerNet
+.vscode/**
+.DS_Store
+**/models/**

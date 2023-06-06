@@ -47,14 +47,14 @@ if __name__ == '__main__':
     parser.add_argument('--pretrain',   required=False, action='store_true',  help='Perform testing only' )
     parser.add_argument('--weights_encoder',  required=False, type=str, default=None)
     parser.add_argument('--num_layers',  required=False, type=int, default=2)
-    
+
 
     parser.add_argument('--batch_size', required=False, type=int,   default=256,     help='Batch size' )
     parser.add_argument('--LR',       required=False, type=float,   default=1e-03, help='Learning Rate' )
     parser.add_argument('--LRe',       required=False, type=float,   default=1e-06, help='Learning Rate end' )
     parser.add_argument('--patience', required=False, type=int,   default=10,     help='Patience before reducing LR (ReduceLROnPlateau)' )
 
-    parser.add_argument('--GPU',        required=False, type=int,   default=-1,     help='ID of the GPU to use' )
+    parser.add_argument('--GPU',        required=False, type=str,   default="-1",     help='IDs of the GPU to use' )
     parser.add_argument('--max_num_worker',   required=False, type=int,   default=4, help='number of worker to load data')
     parser.add_argument('--seed',   required=False, type=int,   default=0, help='seed for reproducibility')
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
             logging.StreamHandler()
         ])
 
-    if args.GPU >= 0:
+    if args.GPU != "-1":
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
 
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         args.weights_encoder = f"models/{args.model_name}/caption/model.pth.tar" if args.pretrain else None
         spotting.main(args)
         logging.info(f'Total Execution Time is {time.time()-start} seconds')
-    
+
     args.weights_encoder = None
     captioning.dvc(args)
     logging.info(f'Total Execution Time is {time.time()-start} seconds')
