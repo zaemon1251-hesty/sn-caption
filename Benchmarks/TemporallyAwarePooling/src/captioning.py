@@ -34,7 +34,7 @@ def main(args):
         print("feature_dim found:", args.feature_dim)
     # create model
     model = Video2Caption(vocab_size=dataset_Test.vocab_size, weights=args.load_weights, input_size=args.feature_dim,
-                  window_size=args.window_size_caption, 
+                  window_size=args.window_size_caption,
                   vlad_k = args.vlad_k,
                   framerate=args.framerate,
                   pool=args.pool,
@@ -64,15 +64,15 @@ def main(args):
     # training parameters
     if not args.test_only:
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.LR, 
-                                    betas=(0.9, 0.999), eps=1e-08, 
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.LR,
+                                    betas=(0.9, 0.999), eps=1e-08,
                                     weight_decay=0, amsgrad=False)
 
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True, patience=args.patience)
 
         # start training
-        trainer("caption", train_loader, val_loader, val_metric_loader, 
+        trainer("caption", train_loader, val_loader, val_metric_loader,
                 model, optimizer, scheduler, criterion,
                 model_name=args.model_name,
                 max_epochs=args.max_epochs, evaluation_frequency=args.evaluation_frequency)
@@ -114,7 +114,7 @@ def main(args):
         wandb.log({f"{k}_{split}_gt" : v for k, v in results.items()})
 
 
-    return 
+    return
 
 def dvc(args):
 
@@ -129,7 +129,7 @@ def dvc(args):
         print("feature_dim found:", args.feature_dim)
     # create model
     model = Video2Caption(vocab_size=dataset_Test.vocab_size, weights=args.load_weights, input_size=args.feature_dim,
-                  window_size=args.window_size_caption, 
+                  window_size=args.window_size_caption,
                   vlad_k = args.vlad_k,
                   framerate=args.framerate,
                   pool=args.pool,
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     parser.add_argument('--pool',       required=False, type=str,   default="NetVLAD++", help='How to pool' )
     parser.add_argument('--vlad_k',       required=False, type=int,   default=64, help='Size of the vocabulary for NetVLAD' )
     parser.add_argument('--min_freq',       required=False, type=int,   default=5, help='Minimum word frequency to the vocabulary for caption generation' )
-    
+
     parser.add_argument('--teacher_forcing_ratio',  required=False, type=valid_probability,   default=1, help='Teacher forcing ratio to use' )
     parser.add_argument('--num_layers',  required=False, type=int,   default=2, help='Teacher forcing ratio to use' )
     parser.add_argument('--freeze_encoder',  required=False, type=bool, default=False)
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
     if args.GPU >= 0:
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
+        # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
 
 
     start=time.time()

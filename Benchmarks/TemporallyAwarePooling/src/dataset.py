@@ -71,7 +71,7 @@ class SoccerNetClips(Dataset):
     """
     This class is used to download and pre-compute clips from the SoccerNet dataset for spotting training phase.
     """
-    def __init__(self, path, features="ResNET_PCA512.npy", split=["train"], version=2, 
+    def __init__(self, path, features="ResNET_PCA512.npy", split=["train"], version=2,
                 framerate=2, window_size=15):
         self.path = path
         self.listGames = getListGames(split, task="caption")
@@ -83,13 +83,14 @@ class SoccerNetClips(Dataset):
         self.num_classes = num_classes
         self.dict_event = dict_event
 
-        logging.info("Checking/Download features and labels locally")
-        downloader = SoccerNetDownloader(path)
-        for s in split:
-            if s == "challenge":
-                downloader.downloadGames(files=[f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
-            else:
-                downloader.downloadGames(files=[self.labels, f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
+        self.listGames = self.listGames
+        # logging.info("Checking/Download features and labels locally")
+        # downloader = SoccerNetDownloader(path)
+        # for s in split:
+        #     if s == "challenge":
+        #         downloader.downloadGames(files=[f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
+        #     else:
+        #         downloader.downloadGames(files=[self.labels, f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
 
         logging.info("Pre-compute clips")
 
@@ -124,9 +125,9 @@ class SoccerNetClips(Dataset):
 
                 minutes, seconds = time.split(' ')[-1].split(':')
                 minutes, seconds = int(minutes), int(seconds)
-                frame = framerate * ( seconds + 60 * minutes ) 
+                frame = framerate * ( seconds + 60 * minutes )
 
-                
+
                 if event not in self.dict_event or half > 2:
                     continue
                 label = self.dict_event[event]
@@ -144,7 +145,7 @@ class SoccerNetClips(Dataset):
                 if half == 2:
                     label_half2[frame//self.window_size_frame][0] = 0 # not BG anymore
                     label_half2[frame//self.window_size_frame][label+1] = 1 # that's my class
-            
+
             self.game_feats.append(feat_half1)
             self.game_feats.append(feat_half2)
             self.game_labels.append(label_half1)
@@ -152,8 +153,6 @@ class SoccerNetClips(Dataset):
 
         self.game_feats = np.concatenate(self.game_feats)
         self.game_labels = np.concatenate(self.game_labels)
-
-
 
     def __getitem__(self, index):
         """
@@ -173,7 +172,7 @@ class SoccerNetClipsTesting(Dataset):
     """
     This class is used to download and pre-compute clips from the SoccerNet dataset for spotting inference phase.
     """
-    def __init__(self, path, features="ResNET_PCA512.npy", split=["test"], version=2, 
+    def __init__(self, path, features="ResNET_PCA512.npy", split=["test"], version=2,
                 framerate=2, window_size=15):
         self.path = path
         self.listGames = getListGames(split, task="caption")
@@ -186,14 +185,15 @@ class SoccerNetClipsTesting(Dataset):
         self.labels = labels
         self.num_classes = num_classes
         self.dict_event = dict_event
+        self.listGames = self.listGames
 
-        logging.info("Checking/Download features and labels locally")
-        downloader = SoccerNetDownloader(path)
-        for s in split:
-            if s == "challenge":
-                downloader.downloadGames(files=[f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
-            else:
-                downloader.downloadGames(files=[self.labels, f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
+        # logging.info("Checking/Download features and labels locally")
+        # downloader = SoccerNetDownloader(path)
+        # for s in split:
+        #     if s == "challenge":
+        #         downloader.downloadGames(files=[f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
+        #     else:
+        #         downloader.downloadGames(files=[self.labels, f"1_{self.features}", f"2_{self.features}"], split=[s], task="caption", verbose=False,randomized=True)
 
     def __getitem__(self, index):
         """
@@ -227,9 +227,9 @@ class SoccerNetClipsTesting(Dataset):
 
                 minutes, seconds = time.split(' ')[-1].split(':')
                 minutes, seconds = int(minutes), int(seconds)
-                frame = self.framerate * ( seconds + 60 * minutes ) 
+                frame = self.framerate * ( seconds + 60 * minutes )
 
-                
+
                 if event not in self.dict_event or half > 2:
                     continue
                 label = self.dict_event[event]
@@ -247,18 +247,15 @@ class SoccerNetClipsTesting(Dataset):
                     frame = min(frame, feat_half2.shape[0]-1)
                     label_half2[frame][label] = value
 
-        
-            
-
-        feat_half1 = feats2clip(torch.from_numpy(feat_half1), 
-                        stride=1, off=int(self.window_size_frame/2), 
+        feat_half1 = feats2clip(torch.from_numpy(feat_half1),
+                        stride=1, off=int(self.window_size_frame/2),
                         clip_length=self.window_size_frame)
 
-        feat_half2 = feats2clip(torch.from_numpy(feat_half2), 
-                        stride=1, off=int(self.window_size_frame/2), 
+        feat_half2 = feats2clip(torch.from_numpy(feat_half2),
+                        stride=1, off=int(self.window_size_frame/2),
                         clip_length=self.window_size_frame)
 
-        
+
         return self.listGames[index], feat_half1, feat_half2, label_half1, label_half2
 
     def __len__(self):
@@ -277,28 +274,28 @@ class SoccerNetCaptions(Dataset):
         self.version = version
         self.labels, self.num_classes, self.dict_event, _ = getMetaDataTask("caption", "SoccerNet", version)
 
-        logging.info("Checking/Download features and labels locally")
-        downloader = SoccerNetDownloader(path)
-        downloader.downloadGames(files=[self.labels, f"1_{self.features}", f"2_{self.features}"], task="caption",split=split, verbose=False,randomized=True)
-
+        # logging.info("Checking/Download features and labels locally")
+        # downloader = SoccerNetDownloader(path)
+        # downloader.downloadGames(files=[self.labels, f"1_{self.features}", f"2_{self.features}"], task="caption",split=split, verbose=False,randomized=True)
+        self.listGames = self.listGames
         self.data = list()
         self.game_feats = list()
 
-        l_pad = self.window_size_frame//2 + self.window_size_frame%2
-        r_pad = self.window_size_frame//2 
+        # l_pad = self.window_size_frame//2 + self.window_size_frame%2
+        # r_pad = self.window_size_frame//2
 
         for game_id, game in enumerate(tqdm(self.listGames)):
             # Load features
-            feat_half1 = np.load(os.path.join(self.path, game, "1_" + self.features))
-            feat_half1 = np.pad(feat_half1.reshape(-1, feat_half1.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
-            feat_half2 = np.load(os.path.join(self.path, game, "2_" + self.features))
-            feat_half2 = np.pad(feat_half2.reshape(-1, feat_half2.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
-            
-            self.game_feats.append((feat_half1, feat_half2)) 
+            # feat_half1 = np.load(os.path.join(self.path, game, "1_" + self.features))
+            # feat_half1 = np.pad(feat_half1.reshape(-1, feat_half1.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+            # feat_half2 = np.load(os.path.join(self.path, game, "2_" + self.features))
+            # feat_half2 = np.pad(feat_half2.reshape(-1, feat_half2.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+
+            # self.game_feats.append((feat_half1, feat_half2))
 
             # Load labels
             labels = json.load(open(os.path.join(self.path, game, self.labels)))
-            
+
             for caption_id, annotation in enumerate(labels["annotations"]):
 
                 time = annotation["gameTime"]
@@ -309,10 +306,10 @@ class SoccerNetCaptions(Dataset):
 
                 minutes, seconds = time.split(' ')[-1].split(':')
                 minutes, seconds = int(minutes), int(seconds)
-                frame = framerate * ( seconds + 60 * minutes) 
-                
+                frame = framerate * ( seconds + 60 * minutes)
+
                 self.data.append(((game_id, half-1, frame) , (caption_id, annotation['anonymized'])))
-        
+
         #launch a VideoProcessor that will create a clip around a caption
         self.video_processor = SoccerNetVideoProcessor(self.window_size_frame)
         #launch a TextProcessor that will tokenize a caption
@@ -334,11 +331,22 @@ class SoccerNetCaptions(Dataset):
             caption (List[strings]): list of original captions.
         """
         clip_id, (caption_id, caption) = self.data[idx]
-        vfeats = self.video_processor(clip_id, self.game_feats)
-        caption_tokens = self.text_processor(caption)    
-        
-        return vfeats, caption_tokens, clip_id[0], caption_id, caption
-    
+        game_id = clip_id[0]
+        game = self.listGames[game_id]
+
+        l_pad = self.window_size_frame//2 + self.window_size_frame%2
+        r_pad = self.window_size_frame//2
+        feat_half1 = np.load(os.path.join(self.path, game, "1_" + self.features))
+        feat_half1 = np.pad(feat_half1.reshape(-1, feat_half1.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+        feat_half2 = np.load(os.path.join(self.path, game, "2_" + self.features))
+        feat_half2 = np.pad(feat_half2.reshape(-1, feat_half2.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+
+
+        vfeats = self.video_processor(clip_id, {game_id: (feat_half1, feat_half2)})
+        caption_tokens = self.text_processor(caption)
+
+        return vfeats, caption_tokens, game_id, caption_id, caption
+
     def getCorpus(self, split=["train"]):
         """
         Args:
@@ -348,7 +356,7 @@ class SoccerNetCaptions(Dataset):
         """
         corpus = [annotation['anonymized'] for game in getListGames(split, task="caption") for annotation in json.load(open(os.path.join(self.path, game, self.labels)))["annotations"]]
         return corpus
-    
+
     def detokenize(self, tokens, remove_EOS=True):
         """
         Args:
@@ -392,16 +400,16 @@ class SoccerNetTextProcessor(object):
         self.tokenizer = lambda s: [c.text for c in spacy_token(s)]
         self.min_freq = min_freq
         self.build_vocab(corpus)
-    
+
     def build_vocab(self, corpus):
         counter = Counter([token for c in corpus for token in self.tokenizer(c)])
         voc = vocab(counter, min_freq=self.min_freq, specials=["[PAD]", "[SOS]", "[EOS]", "[UNK]", "[MASK]", "[CLS]"])
         voc.set_default_index(voc['[UNK]'])
         self.vocab = voc
-    
+
     def __call__(self, text):
         return self.vocab(self.tokenizer(text))
-    
+
     def detokenize(self, tokens):
         return " ".join(self.vocab.lookup_tokens(tokens))
 
@@ -416,28 +424,29 @@ class PredictionCaptions(Dataset):
         self.labels, _, self.dict_event, _ = getMetaDataTask("caption", "SoccerNet", version)
         self.split = split
 
-        logging.info("Checking/Download features and labels locally")
-        downloader = SoccerNetDownloader(self.path)
-        downloader.downloadGames(files=[f"1_{self.features}", f"2_{self.features}"], task="caption", split=split, verbose=False,randomized=True)
+        # logging.info("Checking/Download features and labels locally")
+        # downloader = SoccerNetDownloader(self.path)
+        # downloader.downloadGames(files=[f"1_{self.features}", f"2_{self.features}"], task="caption", split=split, verbose=False,randomized=True)
+        self.listGames = self.listGames
 
         self.data = list()
         self.game_feats = list()
 
-        l_pad = self.window_size_frame//2 + self.window_size_frame%2
-        r_pad = self.window_size_frame//2 
+        # l_pad = self.window_size_frame//2 + self.window_size_frame%2
+        # r_pad = self.window_size_frame//2
 
         for game_id, game in enumerate(tqdm(self.listGames)):
             # Load features
-            feat_half1 = np.load(os.path.join(self.path, game, "1_" + self.features))
-            feat_half1 = np.pad(feat_half1.reshape(-1, feat_half1.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
-            feat_half2 = np.load(os.path.join(self.path, game, "2_" + self.features))
-            feat_half2 = np.pad(feat_half2.reshape(-1, feat_half2.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
-            
-            self.game_feats.append((feat_half1, feat_half2)) 
+            # feat_half1 = np.load(os.path.join(self.path, game, "1_" + self.features))
+            # feat_half1 = np.pad(feat_half1.reshape(-1, feat_half1.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+            # feat_half2 = np.load(os.path.join(self.path, game, "2_" + self.features))
+            # feat_half2 = np.pad(feat_half2.reshape(-1, feat_half2.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+
+            # self.game_feats.append((feat_half1, feat_half2))
 
             # Load labels
             preds = json.load(open(os.path.join(self.PredictionPath, game, "results_spotting.json")))
-            
+
             for caption_id, annotation in enumerate(preds["predictions"]):
 
                 if annotation["label"] not in self.dict_event:
@@ -450,16 +459,16 @@ class PredictionCaptions(Dataset):
 
                 minutes, seconds = time.split(' ')[-1].split(':')
                 minutes, seconds = int(minutes), int(seconds)
-                frame = framerate * ( int(seconds) + 60 * int(minutes)) 
-                
+                frame = framerate * ( int(seconds) + 60 * int(minutes))
+
                 self.data.append(((game_id, half-1, frame), caption_id))
-        
+
         #launch a VideoProcessor that will create a clip around a caption
         self.video_processor = SoccerNetVideoProcessor(self.window_size_frame)
         #launch a TextProcessor that will tokenize a caption
         self.text_processor = SoccerNetTextProcessor(self.getCorpus(split=["train"]))
         self.vocab_size = len(self.text_processor.vocab)
-    
+
     def __len__(self):
         return len(self.data)
 
@@ -472,9 +481,20 @@ class PredictionCaptions(Dataset):
             clip_id (np.array): clip id.
             caption_id (np.array): caption id.
         """
-        clip_id, caption_id = self.data[idx]
-        vfeats = self.video_processor(clip_id, self.game_feats)   
-        return vfeats, clip_id[0], caption_id
+        clip_id, (caption_id, _) = self.data[idx]
+        game_id = clip_id[0]
+        game = self.listGames[game_id]
+
+        l_pad = self.window_size_frame//2 + self.window_size_frame%2
+        r_pad = self.window_size_frame//2
+        feat_half1 = np.load(os.path.join(self.path, game, "1_" + self.features))
+        feat_half1 = np.pad(feat_half1.reshape(-1, feat_half1.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+        feat_half2 = np.load(os.path.join(self.path, game, "2_" + self.features))
+        feat_half2 = np.pad(feat_half2.reshape(-1, feat_half2.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
+
+
+        vfeats = self.video_processor(clip_id, {game_id: (feat_half1, feat_half2)})
+        return vfeats, game_id, caption_id
 
 
     def detokenize(self, tokens, remove_EOS=True):
@@ -486,7 +506,7 @@ class PredictionCaptions(Dataset):
         """
         string = self.text_processor.detokenize(tokens)
         return string.rstrip(f" {self.text_processor.vocab.lookup_token(EOS_TOKEN)}") if remove_EOS else string
-    
+
     def getCorpus(self, split=["train"]):
         """
         Args:
