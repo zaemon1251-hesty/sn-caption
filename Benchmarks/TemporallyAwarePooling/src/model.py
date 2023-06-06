@@ -133,6 +133,7 @@ class DecoderRNN(nn.Module):
         features = torch.stack([features]*self.num_layers)
         #Embdedding
         captions = self.embed(captions)
+        lengths = lengths.to('cpu')
         #To reduce the computation, we pack padd sequences
         captions = pack_padded_sequence(captions, lengths, batch_first=True, enforce_sorted=False)
         #Video encoder features are used as initial states

@@ -18,6 +18,9 @@ import wandb
 
 def main(args):
 
+    device_ids = os.environ['CUDA_VISIBLE_DEVICES'].split(',')
+    device_ids = [int(id_) for id_ in device_ids]
+
     logging.info("Parameters:")
     for arg in vars(args):
         logging.info(arg.rjust(15) + " : " + str(getattr(args, arg)))
@@ -32,7 +35,7 @@ def main(args):
     if args.feature_dim is None:
         args.feature_dim = dataset_Test[0][0].shape[-1]
         print("feature_dim found:", args.feature_dim)
-    # create model
+    # create model.module
     model = Video2Caption(vocab_size=dataset_Test.vocab_size, weights=args.load_weights, input_size=args.feature_dim,
                   window_size=args.window_size_caption,
                   vlad_k = args.vlad_k,
@@ -40,10 +43,13 @@ def main(args):
                   pool=args.pool,
                   num_layers=args.num_layers,
                   teacher_forcing_ratio=args.teacher_forcing_ratio, freeze_encoder=args.freeze_encoder, weights_encoder=args.weights_encoder).cuda()
-    logging.info(model)
+
+    model = torch.nn.DataParallel(model, device_ids=device_ids)
+
+    logging.info(model.module)
     total_params = sum(p.numel()
-                       for p in model.parameters() if p.requires_grad)
-    parameters_per_layer  = [p.numel() for p in model.parameters() if p.requires_grad]
+                       for p in model.module.parameters() if p.requires_grad)
+    parameters_per_layer  = [p.numel() for p in model.module.parameters() if p.requires_grad]
     logging.info("Total number of parameters: " + str(total_params))
 
     # create dataloader
@@ -64,7 +70,7 @@ def main(args):
     # training parameters
     if not args.test_only:
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.LR,
+        optimizer = torch.optim.Adam(model.module.parameters(), lr=args.LR,
                                     betas=(0.9, 0.999), eps=1e-08,
                                     weight_decay=0, amsgrad=False)
 
@@ -79,7 +85,7 @@ def main(args):
 
     # For the best model only
     checkpoint = torch.load(os.path.join("models", args.model_name, "caption","model.pth.tar"))
-    model.load_state_dict(checkpoint['state_dict'])
+    model.module.load_state_dict(checkpoint['state_dict'])
     model = model.cuda()
 
     # validate caption generation on groundtruth spots on multiple splits [test/challenge]
@@ -137,13 +143,13 @@ def dvc(args):
                   teacher_forcing_ratio=args.teacher_forcing_ratio).cuda()
     logging.info(model)
     total_params = sum(p.numel()
-                       for p in model.parameters() if p.requires_grad)
-    parameters_per_layer  = [p.numel() for p in model.parameters() if p.requires_grad]
+                       for p in model.module.parameters() if p.requires_grad)
+    parameters_per_layer  = [p.numel() for p in model.module.parameters() if p.requires_grad]
     logging.info("Total number of parameters: " + str(total_params))
 
     # For the best model only
     checkpoint = torch.load(os.path.join("models", args.model_name, "caption","model.pth.tar"))
-    model.load_state_dict(checkpoint['state_dict'])
+    model.module.load_state_dict(checkpoint['state_dict'])
     model = model.cuda()
 
     # generate dense caption on multiple splits [test/challenge]
