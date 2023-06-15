@@ -76,13 +76,13 @@ def trainer(phase, train_loader,
             wandb.log({**{
                 f"loss_train_{phase}": loss_training,
                 f"loss_val_{phase}": loss_validation,
-                "epoch" : epoch,
+                # "epoch" : epoch,
                 }, **{f"{k}_val" : v for k, v in performance_validation.items()}} )
         else:
             wandb.log({
                 f"loss_train_{phase}": loss_training,
                 f"loss_val_{phase}": loss_validation,
-                "epoch" : epoch,
+                # "epoch" : epoch,
                 })
 
         # Reduce LR on Plateau after patience reached
@@ -165,6 +165,8 @@ def train(phase, dataloader, model, criterion, optimizer, epoch, train=False):
             desc += f'(it:{data_time.val:.3f}s) '
             desc += f'Loss {losses.avg:.4e} '
             t.set_description(desc)
+
+    wandb.log({"data_time_caption_train": data_time.avg, "batch_time_caption_train": batch_time.avg})
 
     return losses.avg
 
@@ -376,7 +378,7 @@ def validate_captioning(dataloader, model, model_name):
             data_time.update(time.time() - end)
             feats = feats.cuda()
             #compute output string
-            output = [dataloader.dataset.detokenize(list(model.sample(feats[idx]).detach().cpu())) for idx in range(feats.shape[0])]
+            output = [dataloader.dataset.detokenize(list(model.module.sample(feats[idx]).detach().cpu())) for idx in range(feats.shape[0])]
 
             all_outputs.extend(output)
             all_labels.extend(caption_or)
@@ -390,6 +392,8 @@ def validate_captioning(dataloader, model, model_name):
             desc += f'Data:{data_time.avg:.3f}s '
             desc += f'(it:{data_time.val:.3f}s) '
             t.set_description(desc)
+
+    wandb.log({"data_time_caption_val": data_time.avg, "batch_time_caption_val": batch_time.avg})
 
     scores = caption_scorer.compute_metrics(ref_list=[all_labels,], hyp_list=all_outputs)
     return scores
@@ -413,7 +417,14 @@ def test_captioning(dataloader, model, model_name, output_filename = "results_de
             # measure data loading time
             data_time.update(time.time() - end)
             feats = feats.cuda()
-            output = [dataloader.dataset.detokenize(list(model.sample(feats[idx]).detach().cpu())) for idx in range(feats.shape[0])]
+            output = [
+                list(
+                    map(
+                        lambda ids:dataloader.dataset.detokenize(list(ids)),
+                        model.module.sample_bs(feats[idx]).detach().cpu()
+                    )
+                )
+            for idx in range(feats.shape[0])]
 
             all_outputs.extend(output)
             all_index.extend([(i.item(), j.item()) for i, j in zip(game_id, cap_id)])
@@ -427,6 +438,8 @@ def test_captioning(dataloader, model, model_name, output_filename = "results_de
             desc += f'Data:{data_time.avg:.3f}s '
             desc += f'(it:{data_time.val:.3f}s) '
             t.set_description(desc)
+
+    wandb.log({"data_time_caption_test": data_time.avg, "batch_time_caption_test": batch_time.avg})
 
     #store output
     captions = dict(zip(all_index, all_outputs))

@@ -281,6 +281,9 @@ class SoccerNetCaptions(Dataset):
         self.data = list()
         self.game_feats = list()
 
+        fun_facts = {}
+        label_set = set()
+
         # l_pad = self.window_size_frame//2 + self.window_size_frame%2
         # r_pad = self.window_size_frame//2
 
@@ -293,6 +296,8 @@ class SoccerNetCaptions(Dataset):
 
             # self.game_feats.append((feat_half1, feat_half2))
 
+            fun_facts_game = {}
+
             # Load labels
             labels = json.load(open(os.path.join(self.path, game, self.labels)))
 
@@ -301,6 +306,9 @@ class SoccerNetCaptions(Dataset):
                 time = annotation["gameTime"]
                 event = annotation["label"]
                 half = int(time[0])
+                label_set.add(event)
+                if event == "funfact":
+                    fun_facts_game[time] = annotation["anonymized"]
                 if event not in self.dict_event or half > 2:
                     continue
 
@@ -310,11 +318,17 @@ class SoccerNetCaptions(Dataset):
 
                 self.data.append(((game_id, half-1, frame) , (caption_id, annotation['anonymized'])))
 
+            fun_facts[game] = fun_facts_game
+
         #launch a VideoProcessor that will create a clip around a caption
         self.video_processor = SoccerNetVideoProcessor(self.window_size_frame)
         #launch a TextProcessor that will tokenize a caption
         self.text_processor = SoccerNetTextProcessor(self.getCorpus(split=["train"]))
         self.vocab_size = len(self.text_processor.vocab)
+
+        print("label_set: {}".format(label_set))
+        with open(os.path.join(self.path, "fun-facts.json"), "w") as f:
+            json.dump(fun_facts, f)
 
     def __len__(self):
         return len(self.data)
@@ -522,12 +536,12 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader
     torch.manual_seed(0)
     np.random.seed(0)
-    root = "/scratch/users/hmkhallati/SoccerNet/"
-    dataset_Test  = SoccerNetCaptions(path=root, features="ResNET_TF2_PCA512.npy", split="test", version=2, framerate=2, window_size=15)
+    root = "/raid_elmo/home/lr/moriy/SoccerNet_caption-2023/caption-2023"
+    dataset_Test  = SoccerNetCaptions(path=root, features="baidu_soccer_embeddings.npy", split=["train"], version=2, framerate=2, window_size=15)
     test_loader = torch.utils.data.DataLoader(dataset_Test,
         batch_size=1, shuffle=False, pin_memory=True)
-    batch = next(iter(test_loader))
-    (feats, caption), lengths, mask, caption_or, idx = batch
-    print(feats, caption)
-    print(test_loader.detokenize([55, 22, 33, 2]))
-    print(idx)
+    # batch = next(iter(test_loader))
+    # (feats, caption), lengths, mask, caption_or, idx = batch
+    # print(feats, caption)
+    # print(test_loader.detokenize([55, 22, 33, 2]))
+    # print(idx)

@@ -14,13 +14,14 @@ from train import trainer, test_captioning, validate_captioning
 from utils import valid_probability
 
 import wandb
-
+import gc
 
 def main(args):
 
     device_ids = os.environ['CUDA_VISIBLE_DEVICES'].split(',')
     device_ids = [int(id_) for id_ in device_ids]
 
+    logging.info("deive_ids: {}".format(device_ids))
     logging.info("Parameters:")
     for arg in vars(args):
         logging.info(arg.rjust(15) + " : " + str(getattr(args, arg)))
@@ -32,11 +33,16 @@ def main(args):
         dataset_Valid_metric  = SoccerNetCaptions(path=args.SoccerNet_path, features=args.features, split=args.split_valid, version=args.version, framerate=args.framerate, window_size=args.window_size_caption)
     dataset_Test  = SoccerNetCaptions(path=args.SoccerNet_path, features=args.features, split=args.split_test, version=args.version, framerate=args.framerate, window_size=args.window_size_caption)
 
+    test_vocav_size = dataset_Test.vocab_size
+    test_feature_dim = dataset_Test[0][0].shape[-1]
+    del dataset_Test
+    gc.collect()
+
     if args.feature_dim is None:
-        args.feature_dim = dataset_Test[0][0].shape[-1]
+        args.feature_dim = test_feature_dim
         print("feature_dim found:", args.feature_dim)
-    # create model.module
-    model = Video2Caption(vocab_size=dataset_Test.vocab_size, weights=args.load_weights, input_size=args.feature_dim,
+    # create model
+    model = Video2Caption(vocab_size=test_vocav_size, weights=args.load_weights, input_size=args.feature_dim,
                   window_size=args.window_size_caption,
                   vlad_k = args.vlad_k,
                   framerate=args.framerate,
@@ -123,6 +129,10 @@ def main(args):
     return
 
 def dvc(args):
+    device_ids = os.environ['CUDA_VISIBLE_DEVICES'].split(',')
+    device_ids = [int(id_) for id_ in device_ids]
+
+    logging.info("deive_ids: {}".format(device_ids))
 
     logging.info("Parameters:")
     for arg in vars(args):
@@ -141,6 +151,9 @@ def dvc(args):
                   pool=args.pool,
                   num_layers=args.num_layers,
                   teacher_forcing_ratio=args.teacher_forcing_ratio).cuda()
+
+    model = torch.nn.DataParallel(model, device_ids=device_ids)
+
     logging.info(model)
     total_params = sum(p.numel()
                        for p in model.module.parameters() if p.requires_grad)
@@ -268,6 +281,6 @@ if __name__ == '__main__':
 
 
     start=time.time()
-    logging.info('Starting main function')
+    logging.info('Starting dvc function')
     main(args)
     logging.info(f'Total Execution Time is {time.time()-start} seconds')
