@@ -341,7 +341,6 @@ class SoccerNetCaptions(Dataset):
         feat_half2 = np.load(os.path.join(self.path, game, "2_" + self.features))
         feat_half2 = np.pad(feat_half2.reshape(-1, feat_half2.shape[-1]), ((l_pad, r_pad), (0, 0)), "edge")
 
-
         vfeats = self.video_processor(clip_id, {game_id: (feat_half1, feat_half2)})
         caption_tokens = self.text_processor(caption)
 
@@ -522,12 +521,12 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader
     torch.manual_seed(0)
     np.random.seed(0)
-    root = "/scratch/users/hmkhallati/SoccerNet/"
-    dataset_Test  = SoccerNetCaptions(path=root, features="ResNET_TF2_PCA512.npy", split="test", version=2, framerate=2, window_size=15)
+    root = "/raid_elmo/home/lr/moriy/SoccerNet_caption-2023/caption-2023/"
+    dataset_Test  = SoccerNetCaptions(path=root, features="baidu_soccer_embeddings.npy", split=["test"], version=2, framerate=2, window_size=15)
     test_loader = torch.utils.data.DataLoader(dataset_Test,
-        batch_size=1, shuffle=False, pin_memory=True)
+        batch_size=1, shuffle=False, pin_memory=True, collate_fn=collate_fn_padd)
     batch = next(iter(test_loader))
     (feats, caption), lengths, mask, caption_or, idx = batch
     print(feats, caption)
-    print(test_loader.detokenize([55, 22, 33, 2]))
+    print(test_loader.dataset.detokenize([55, 22, 33, 2]))
     print(idx)
