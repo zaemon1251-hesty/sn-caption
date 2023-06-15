@@ -1,7 +1,8 @@
 import __future__
-
+import operator
 import numpy as np
 import warnings
+from queue import PriorityQueue
 
 import torch
 import torch.nn as nn
@@ -154,6 +155,7 @@ class DecoderRNN(nn.Module):
         inputs = self.embed(inputs)
         #Sample at most max_seq_length token
         for i in range(max_seq_length):
+
             hiddens, states = self.lstm(inputs, states)
             outputs = self.fc(hiddens.squeeze(1))
             #Sample the most likely word
@@ -163,8 +165,120 @@ class DecoderRNN(nn.Module):
                 #end of sampling
                 break
             inputs = self.embed(predicted).unsqueeze(1)
+            print("########")
+            print("step: ", i)
+            print(inputs.shape)
+            print(predicted)
+
         sampled_ids = torch.cat(sampled_ids)
         return sampled_ids
+
+    def sample_dbs(self, features, max_seq_length, beam_width=10, group_size=5, topk=5):
+        '''
+        sample with diverse beam search
+        ref: https://arxiv.org/pdf/1610.02424.pdf
+        '''
+        raise NotImplementedError
+
+    def sample_bs(self, features, max_seq_length):
+        import heapq
+        '''
+        sample with beam search
+        '''
+        beam_width = 5
+        nodes = [[] for _ in range(beam_width)]
+        endnodes = []
+        #Features extraction of video encoder
+        features = self.ft_extactor_2(self.activation(self.dropout(self.ft_extactor_1(features))))
+        features = torch.stack([features]*self.num_layers)
+        #Video encoder features are used as initial states
+        states = (features, features)
+        #Start token
+        inputs = torch.tensor([[SOS_TOKEN]], device=features.device)
+        #Start token
+        inputs = self.embed(inputs)
+        for i in range(beam_width):
+            nodes[i] = (0, [], inputs, states, 0.0, 1)
+
+        #Sample at most max_seq_length token
+        for i in range(max_seq_length):
+            candidates = []
+            for node in nodes:
+                score, sample_ids, inputs, states, joint_log_prob, length = node
+
+                if len(sample_ids) > 0 and int(sample_ids[-1]) == EOS_TOKEN:
+                    #end of sampling
+                    heapq.heappush(endnodes, (score, sample_ids))
+                    break
+
+                # print("########")
+                # print("step: ", i)
+                # print("beam: ", j)
+                # print("score: ", score)
+                # print(inputs.shape)
+                # print(states[0].shape)
+                hiddens, next_states = self.lstm(inputs, states)
+                outputs = self.fc(hiddens.squeeze(1))
+                #Sample the most likely word
+                log_probs, predicted = outputs.topk(beam_width, dim=1)
+
+                for top_k in range(beam_width):
+                    sample_id = predicted[0][top_k].unsqueeze(0)
+                    log_prob_single = log_probs[0][top_k]
+                    joint_log_prob = joint_log_prob + log_prob_single
+                    next_inputs = self.embed(sample_id).unsqueeze(1)
+                    score = BeamSearchNode.eval(float(joint_log_prob), length + 1)
+                    candidate = (score, sample_ids + [sample_id], next_inputs, next_states, float(joint_log_prob), length+1)
+
+                    print(candidate < (1,1))
+
+                    print("########")
+                    # print("sample_id: ", sample_id)
+                    # print("predicted: ", predicted)
+                    # print(float(joint_log_prob))
+                    # print(length + 1)
+                    print(score)
+                    print(sample_ids + [sample_id])
+                    candidates.append(candidate)
+
+            # all the beam search end
+            candidates.sort(key=lambda x: x[0], reverse=True)
+            nodes = candidates[:beam_width]
+
+        while len(endnodes) > beam_width:
+            heapq.heappop(endnodes)
+
+        sampled_ids_all = map(torch.cat, [heapq.heappop(endnodes)[1] for _ in range(len(endnodes))])
+        return list(sampled_ids_all)
+
+
+class BeamSearchNode(object):
+    def __init__(self, sample_ids, hiddenstate, previousNode, wordId, logProb, length):
+        '''
+        :param hiddenstate:
+        :param previousNode:
+        :param wordId:
+        :param logProb:
+        :param length:
+        '''
+        self.ids = sample_ids
+        self.h = hiddenstate
+        self.prevNode = previousNode
+        self.wordid = wordId
+        self.logp = logProb
+        self.leng = length
+
+    def eval(self, alpha=1.0):
+        reward = 0
+        # Add here a function for shaping a reward
+        return self.logp / float(self.leng - 1 + 1e-6) + alpha * reward
+
+    @classmethod
+    def eval(cls, logp, leng, alpha=1.0):
+        reward = 0
+        # Add here a function for shaping a reward
+        return logp / float(leng - 1 + 1e-6) + alpha * reward
+
 
 class Video2Caption(nn.Module):
     def __init__(self, vocab_size, weights=None, input_size=512, vlad_k=64, window_size=15, framerate=2, pool="NetVLAD", embed_size=256, hidden_size=512, teacher_forcing_ratio=1, num_layers=2, max_seq_length=50, weights_encoder=None, freeze_encoder=False):
@@ -222,6 +336,10 @@ class Video2Caption(nn.Module):
         features = self.encoder(features.unsqueeze(0))
         return self.decoder.sample(features, max_seq_length)
 
+    def sample_bs(self, features, max_seq_length=200):
+        features = self.encoder(features.unsqueeze(0))
+        return self.decoder.sample_bs(features, max_seq_length)
+
 class Video2Spot(nn.Module):
     def __init__(self, weights=None, input_size=512, num_classes=17, vlad_k=64, window_size=15, framerate=2, pool="NetVLAD", weights_encoder=None, freeze_encoder=False):
         """
@@ -267,16 +385,16 @@ class Video2Spot(nn.Module):
 
 
 if __name__ == "__main__":
-
+    print("Testing Video2Caption")
     model = Video2Spot(pool="NetVLAD++", num_classes=1, framerate=2, window_size=15)
-    model.load_encoder("Benchmarks/TemporallyAwarePooling/models/ResNET_TF2_PCA512-NetVLAD++-nms-15-window-15-teacher-1-28-02-2023_12-10-03/caption/model.pth.tar")
+    model.load_encoder()
     print(model.encoder.pool_layer_before.clusters.requires_grad)
 
     BS =5
     T = 15
     framerate= 2
     D = 512
-    pool = "NetRVLAD++"
+    pool = "NetRVLAD"
     vocab_size=100
     #model = VideoEncoder(pool=pool, input_size=D, framerate=framerate, window_size=T)
     model = Video2Caption(vocab_size, pool=pool, input_size=D, framerate=framerate, window_size=T)
@@ -299,20 +417,25 @@ if __name__ == "__main__":
     # ]
     # need torch tensors for torch's pad_sequence(); this could be a part of e.g. dataset's __getitem__ instead
     captions = list(map(lambda x: torch.tensor(x), DATA))
-    lengths = torch.tensor(list(map(len, DATA))).long()
-    lengths = lengths - 1
+    lengths = torch.tensor(list(map(len, DATA)))
     captions = pad_sequence(captions, batch_first=True)
-    target = captions[:, 1:]
+
+    target = captions[:, 1:] #remove SOS token
+    lengths = lengths - 1
+    #pack_padded_sequence to do less computation
     target = pack_padded_sequence(target, lengths, batch_first=True, enforce_sorted=False)[0]
     mask = pack_padded_sequence(captions != 0, lengths, batch_first=True, enforce_sorted=False)[0]
+    # compute output
+    output = model(inp, captions, lengths)
+
+    loss = criterion(output[mask], target[mask])
+
     print("INPUT SHAPE :")
     print(inp.shape, captions.shape)
-    output = model(inp, captions, lengths, teacher_forcing_ratio=1)
-    print(criterion(target, output))
+    print(loss)
     print("OUTPUT SHAPE :")
     print(output)
-    output = model(inp, captions, lengths, teacher_forcing_ratio=0)
-    print(criterion(target, output))
+    print(loss)
     print("OUTPUT SHAPE :")
     print(output)
     print("TARGET")
@@ -322,3 +445,5 @@ if __name__ == "__main__":
 
     print("==============SAMPLING===============")
     print(model.sample(inp[0]))
+
+    print(model.sample_bs(inp[0]))
