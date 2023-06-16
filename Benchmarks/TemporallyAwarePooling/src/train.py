@@ -133,8 +133,8 @@ def train(phase, dataloader, model, criterion, optimizer, epoch, train=False, ra
             data_time.update(time.time() - end)
             if phase == "spotting":
                 feats, labels = batch
-                feats = feats.cuda()
-                labels = labels.cuda()
+                feats = feats.cuda(rank)
+                labels = labels.cuda(rank)
                 # compute output
                 output = model(feats)
 

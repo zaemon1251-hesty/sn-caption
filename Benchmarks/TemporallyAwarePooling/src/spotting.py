@@ -15,10 +15,13 @@ from loss import NLLLoss
 import wandb
 
 
-def main(args):
+def main(rank, world_size, args):
     logging.info("Parameters:")
     for arg in vars(args):
         logging.info(arg.rjust(15) + " : " + str(getattr(args, arg)))
+
+
+    torch.distributed.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
 
     # create dataset
     if not args.test_only:
@@ -46,6 +49,10 @@ def main(args):
             framerate=args.framerate,
             window_size=args.window_size_spotting,
         )
+        sampler_Train = torch.utils.data.distributed.DistributedSampler(dataset_Train, rank=rank)
+        sampler_Valid = torch.utils.data.distributed.DistributedSampler(dataset_Valid, rank=rank)
+        sampler_Valid_metric = torch.utils.data.distributed.DistributedSampler(dataset_Valid_metric, rank=rank)
+
     dataset_Test = SoccerNetClipsTesting(
         path=args.SoccerNet_path,
         features=args.features,
@@ -69,10 +76,14 @@ def main(args):
         pool=args.pool,
         freeze_encoder=args.freeze_encoder,
         weights_encoder=args.weights_encoder,
-    ).cuda()
+    )
+
+    # ddp implementation
+    model = torch.nn.parallel.DistributedDataParallel(model.to(rank), device_ids=[rank])
+
     logging.info(model)
-    total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    parameters_per_layer = [p.numel() for p in model.parameters() if p.requires_grad]
+    total_params = sum(p.numel() for p in model.module.parameters() if p.requires_grad)
+    parameters_per_layer = [p.numel() for p in model.module.parameters() if p.requires_grad]
     logging.info("Total number of parameters: " + str(total_params))
 
     # create dataloader
@@ -127,6 +138,8 @@ def main(args):
             optimizer,
             scheduler,
             criterion,
+            [sampler_Train, sampler_Valid, sampler_Valid_metric]
+            rank=rank,
             model_name=args.model_name,
             max_epochs=args.max_epochs,
             evaluation_frequency=args.evaluation_frequency,
@@ -136,7 +149,7 @@ def main(args):
     checkpoint = torch.load(
         os.path.join("models", args.model_name, "spotting", "model.pth.tar")
     )
-    model.load_state_dict(checkpoint["state_dict"])
+    model.module.load_state_dict(checkpoint["state_dict"])
 
     # test on multiple splits [test/challenge]
     for split in args.split_test:
@@ -356,11 +369,23 @@ if __name__ == "__main__":
         handlers=[logging.FileHandler(log_path), logging.StreamHandler()],
     )
 
-    if args.GPU != "-1":
-        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
+    # if args.GPU != "-1":
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+        # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
+
+
+    # Multi GPU(DDP)
+    import os
+    import torch.multiprocessing as mp
+
+
+    rank = int(os.environ['LOCAL_RANK'])
+    torch.cuda.set_device(rank)
+    world_size = torch.cuda.device_count()
+    logging.info(f'World size is {world_size}')
+
 
     start = time.time()
     logging.info("Starting main function")
-    main(args)
+    mp.spawn(main, nprocs=world_size, args=(world_size, args))
     logging.info(f"Total Execution Time is {time.time()-start} seconds")

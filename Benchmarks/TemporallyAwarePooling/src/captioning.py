@@ -51,8 +51,8 @@ def main(rank, world_size, args):
 
     logging.info(model)
     total_params = sum(p.numel()
-                       for p in model.parameters() if p.requires_grad)
-    parameters_per_layer  = [p.numel() for p in model.parameters() if p.requires_grad]
+                       for p in model.module.parameters() if p.requires_grad)
+    parameters_per_layer  = [p.numel() for p in model.module.parameters() if p.requires_grad]
     logging.info("Total number of parameters: " + str(total_params))
 
     # create dataloader
@@ -287,5 +287,5 @@ if __name__ == '__main__':
 
     start=time.time()
     logging.info('Starting main function')
-    mp.spawn(main, nprocs=world_size, args=(rank, world_size, args))
+    mp.spawn(main, nprocs=world_size, args=(world_size, args))
     logging.info(f'Total Execution Time is {time.time()-start} seconds')

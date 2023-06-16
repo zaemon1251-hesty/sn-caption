@@ -164,7 +164,6 @@ class SoccerNetClips(Dataset):
         Returns:
             clip_feat (np.array): clip of features.
             clip_labels (np.array): clip of labels for the segmentation.
-            clip_targets (np.array): clip of targets for the spotting.
         """
         return self.game_feats[index,:,:], self.game_labels[index,:]
 
@@ -372,6 +371,28 @@ class SoccerNetCaptions(Dataset):
         """
         string = self.text_processor.detokenize(tokens)
         return string.rstrip(f" {self.text_processor.vocab.lookup_token(EOS_TOKEN)}") if remove_EOS else string
+
+    def __getstate__(self):
+        """Pickle 化されるとき呼ばれる"""
+
+        # オブジェクトの持つ属性をコピーする
+        state = self.__dict__.copy()
+
+        # Pickle 化できない属性を除去する
+        del state['text_processor']
+
+        # Pickle 化する属性を返す
+        return state
+
+    def __setstate__(self, state):
+        """非 Pickle 化されるとき呼ばれる"""
+
+        # オブジェクトの持つ属性を復元する
+        self.__dict__.update(state)
+
+        # Pickle 化できなかった属性を作りなおす
+        self.text_processor = SoccerNetTextProcessor(self.getCorpus(split=["train"]))
+
 
 class SoccerNetVideoProcessor(object):
     """video_fn is a tuple of (video_id, half, frame)."""
