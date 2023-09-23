@@ -23,7 +23,7 @@ mkdir models
 
 ## Train the model
 
-```
+```bash
 python src/main.py --SoccerNet_path=path/to/SoccerNet/ --model_name=new_model --features=baidu_soccer_embeddings.npy --framerate 1 --pool=NetVLAD --window_size_caption 45 --window_size_spotting 15 --NMS_window 30 --num_layers 4 --first_stage caption --pretrain --GPU 0
 ```
 
@@ -55,7 +55,6 @@ We developed alternative pooling module
 - `--pool=NetVLAD++`: Temporally aware NetVLAD pooling module
 - `--pool=NetRVLAD`: NetRVLAD pooling module
 - `--pool=NetRVLAD++`: Temporally aware NetRVLAD pooling module
-
 
 ### More training procedure
 

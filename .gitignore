@@ -5,3 +5,4 @@ SoccerNet
 .vscode/**
 .DS_Store
 **/models/**
+data/**

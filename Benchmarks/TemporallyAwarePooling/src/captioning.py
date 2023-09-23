@@ -78,8 +78,12 @@ def main(args):
                 max_epochs=args.max_epochs, evaluation_frequency=args.evaluation_frequency)
 
     # For the best model only
-    checkpoint = torch.load(os.path.join("models", args.model_name, "caption","model.pth.tar"))
-    model.load_state_dict(checkpoint['state_dict'])
+    checkpoint_path = os.path.join("models", args.model_name, "caption","model.pth.tar")
+    if not os.path.exists(checkpoint_path):
+        print("No checkpoint found at '{}'".format(checkpoint_path))
+    else:
+        checkpoint = torch.load(checkpoint_path)
+        model.load_state_dict(checkpoint['state_dict'])
     model = model.cuda()
 
     # validate caption generation on groundtruth spots on multiple splits [test/challenge]
@@ -260,7 +264,7 @@ if __name__ == '__main__':
 
     if args.GPU >= 0:
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-        # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.GPU)
 
 
     start=time.time()
