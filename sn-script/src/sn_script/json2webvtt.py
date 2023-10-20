@@ -91,10 +91,8 @@ def convert_to_vtt(json_data):
 
 
 def seconds_to_vtt_time(seconds):
-    h, remainder = divmod(seconds, 3600)
-    m, s = divmod(remainder, 60)
-    ms = (s % 1) * 1000
-    return f"{int(h):02}:{int(m):02}:{int(s):02}.{int(ms):03}"
+    m, s = divmod(seconds, 60)
+    return f"{int(m):02}:{int(s):02}"
 
 
 if __name__ == "__main__":
