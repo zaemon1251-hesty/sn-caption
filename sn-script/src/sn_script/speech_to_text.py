@@ -5,7 +5,12 @@ from tqdm import tqdm
 import os
 import datetime
 import logging
-from sn_script.config import Config
+
+try:
+    from sn_script.config import Config
+except ModuleNotFoundError:
+    from src.sn_script.config import Config
+
 
 class Logger:
     """save log"""
@@ -27,6 +32,7 @@ class Logger:
     def now_string():
         return str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
+
 log_path = Path(__file__).parent.parent / "logs"
 logger = Logger(log_path.__str__())
 
@@ -40,9 +46,9 @@ def run_transcribe(model, video_dir_path: Path):
     TRANSCRIBE_JSON_PATH = VIDEO_DIR / f"{half_number}_224p.{decode_lang}.json"
 
     result = model.transcribe(str(VIDEO_PATH), verbose=True)
-    with open(TRANSCRIBE_TEXT_PATH, 'w') as f:
+    with open(TRANSCRIBE_TEXT_PATH, "w") as f:
         f.writelines(result["text"])
-    with open(TRANSCRIBE_JSON_PATH, 'w') as f:
+    with open(TRANSCRIBE_JSON_PATH, "w") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
 
@@ -50,17 +56,51 @@ def main(cfg: Config):
     model = whisper.load_model("large")
 
     for target in tqdm(cfg.targets):
-        video_path = cfg.base_dir / target
+        target_dir_path = cfg.base_dir / target
 
-        if not os.path.exists(video_path):
-            logger.info(f"Video not found: {video_path}")
+        if not os.path.exists(target_dir_path):
+            logger.info(f"Video not found: {target_dir_path}")
             continue
 
-        run_transcribe(model, video_path)
+        run_transcribe(model, target_dir_path)
 
     return
 
 
+def asr_comformer():
+    from espnet2.bin.asr_inference import Speech2Text
+
+    model = Speech2Text.from_pretrained(
+        "espnet/jiyang_tang_aphsiabank_english_asr_ebranchformer_small_wavlm_large1"
+    )
+
+    speech, rate = soundfile.read("speech.wav")
+    text, *_ = model(speech)[0]
+
+
+def transcribe_reason():
+    import reazonspeech as rs
+    from espnet2.bin.asr_inference import Speech2Text
+
+    half_number = 1
+
+    target: str = "2014-11-04 - 20-00 Zenit Petersburg 1 - 2 Bayer Leverkusen"
+    video_path = Config.base_dir / target / f"{half_number}_224.wav"
+
+
+    model = Speech2Text.from_pretrained(
+    "espnet/pengcheng_guo_wenetspeech_asr_train_asr_raw_zh_char"
+    )
+
+    cap = rs.transcribe(str(video_path), model)
+
+    # cap is generator
+    while True:
+        try:
+            print(next(cap))
+        except StopIteration:
+            break
+
+
 if __name__ == "__main__":
-    cfg = Config()
-    main(cfg)
+    transcribe_reason()

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class Config:
     base_dir = Path(__file__).parent.parent.parent.parent / "data"
     targets = [

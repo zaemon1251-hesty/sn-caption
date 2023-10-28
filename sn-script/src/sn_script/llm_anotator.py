@@ -1,5 +1,7 @@
 import openai
+
 openai.api_key = "YOUR_API_KEY"
+
 
 def classify_text(text):
     engine = "text-davinci-002"
@@ -14,6 +16,7 @@ def classify_text(text):
     )
     category = response.choices[0].text.strip()
     return category
+
 
 import json
 import os
@@ -31,7 +34,8 @@ question = sys.argv[1]
 # 関数の実装
 def get_belonging_prefecture(cities):
     """市町村名の羅列を受け取って、それぞれと都道府県の対応情報を持ったdictを返す。
-        ただし特に定義のないものはモデルが学習した知識をそのまま使えるように「変更なし」を格納する"""
+    ただし特に定義のないものはモデルが学習した知識をそのまま使えるように「変更なし」を格納する"""
+
     def get_prefecture(city):
         return {"町田市": "神奈川県"}.get(city, "変更なし")
 

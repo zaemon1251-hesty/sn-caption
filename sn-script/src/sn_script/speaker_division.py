@@ -16,11 +16,7 @@ diarization = pipeline(AUDIO_FILE)
 # 結果を格納するためのデータフレームを作成
 data = []
 for segment, _, speaker in diarization.itertracks(yield_label=True):
-    data.append({
-        'start': segment.start,
-        'end': segment.end,
-        'speaker': speaker
-    })
+    data.append({"start": segment.start, "end": segment.end, "speaker": speaker})
 
 # データフレームにデータをセット
 df = pd.DataFrame(data)

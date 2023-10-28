@@ -32,7 +32,7 @@ class Config:
         "url": "https://mt-auto-minhon-mlt.ucri.jgn-x.jp/api/mt/generalNT_en_ja/",
         "user_name": "zaemon1251",
         "API_key": "2da3b429e729b05b3521875e89cc8a15062b1252b",
-        "API_secret": "8b5c1ba43f243a0577f1ce5c8302198b"
+        "API_secret": "8b5c1ba43f243a0577f1ce5c8302198b",
     }
 
 
@@ -42,35 +42,34 @@ def translate(text):
     name = Config.minnano_honyaku["user_name"]
     secret = Config.minnano_honyaku["API_secret"]
 
-    consumer = OAuth1(key , secret)
+    consumer = OAuth1(key, secret)
 
     params = {
-        'key': key,
-        'name': name,
-        'type': 'json',
-        'text': text,
-    }    # その他のパラメータについては、各APIのリクエストパラメータに従って設定してください。
+        "key": key,
+        "name": name,
+        "type": "json",
+        "text": text,
+    }  # その他のパラメータについては、各APIのリクエストパラメータに従って設定してください。
 
     try:
-        res = req.post(url , data=params , auth=consumer)
-        res.encoding = 'utf-8'
-        response = json.loads(res.content.decode('utf-8'))
-        print(response['resultset'])
+        res = req.post(url, data=params, auth=consumer)
+        res.encoding = "utf-8"
+        response = json.loads(res.content.decode("utf-8"))
+        print(response["resultset"])
 
-        message = response['resultset']['result']['text']
+        message = response["resultset"]["result"]["text"]
         return message
 
     except Exception as e:
-        print('=== Error ===')
-        print('type:' + str(type(e)))
-        print('args:' + str(e.args))
-        print('e:' + str(e))
-
+        print("=== Error ===")
+        print("type:" + str(type(e)))
+        print("args:" + str(e.args))
+        print("e:" + str(e))
 
 
 def convert_to_vtt(json_data):
     # WebVTT header
-    vtt_content = 'WEBVTT\n\n'
+    vtt_content = "WEBVTT\n\n"
 
     for segment in json_data["segments"]:
         start_time = seconds_to_vtt_time(segment["start"])
@@ -112,4 +111,3 @@ if __name__ == "__main__":
 
     #     with open(vtt_path, "w") as f:
     #         f.write(vtt_content)
-
