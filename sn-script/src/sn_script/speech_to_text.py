@@ -9,6 +9,8 @@ import logging
 try:
     from sn_script.config import Config
 except ModuleNotFoundError:
+    import sys
+    sys.path.append(".")
     from src.sn_script.config import Config
 
 
@@ -71,7 +73,7 @@ def asr_comformer():
     from espnet2.bin.asr_inference import Speech2Text
 
     model = Speech2Text.from_pretrained(
-        "espnet/jiyang_tang_aphsiabank_english_asr_ebranchformer_small_wavlm_large1"
+        "espnet/YushiUeda_iemocap_sentiment_asr_train_asr_conformer"
     )
 
     speech, rate = soundfile.read("speech.wav")
@@ -85,11 +87,11 @@ def transcribe_reason():
     half_number = 1
 
     target: str = "2014-11-04 - 20-00 Zenit Petersburg 1 - 2 Bayer Leverkusen"
-    video_path = Config.base_dir / target / f"{half_number}_224.wav"
+    video_path = Config.base_dir / target / f"{half_number}_224p.oga"
 
 
     model = Speech2Text.from_pretrained(
-    "espnet/pengcheng_guo_wenetspeech_asr_train_asr_raw_zh_char"
+        "espnet/kamo-naoyuki-mini_an4_asr_train_raw_bpe_valid.acc.best"
     )
 
     cap = rs.transcribe(str(video_path), model)
