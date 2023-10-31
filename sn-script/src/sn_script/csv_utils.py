@@ -1,6 +1,14 @@
-from sn_script.config import Config
 import pandas as pd
 from collections import defaultdict
+
+try:
+    from sn_script.config import Config
+    from sn_script.json2csv import write_csv
+except ModuleNotFoundError:
+    import sys
+
+    sys.path.append(".")
+    from src.sn_script.config import Config
 
 
 def get_gig_class_ratio(half_number: int):
@@ -72,5 +80,40 @@ def clean():
     df.to_csv(DUMP_FILE_PATH, index=False)
 
 
+def create_tokonized_all_csv():
+    half_number = 1
+    ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
+    DENISED_TOKENIZED_CSV_TEMPLATE = f"denoised_{half_number}_tokenized_224p.csv"
+
+    df_list = []
+    for target in Config.targets:
+        target: str = target.rstrip("/").split("/")[-1]
+        csv_path = Config.base_dir / target / DENISED_TOKENIZED_CSV_TEMPLATE
+        tmp_df = pd.read_csv(csv_path)
+        tmp_df["game"] = target.replace("SoccerNet/", "")
+        df_list.append(tmp_df)
+
+    all_game_df = pd.concat(df_list)
+    all_game_df = (
+        all_game_df
+        .reindex(columns=["id", "game", "start", "end", "text", "大分類", "小分類", "備考"])
+        .reset_index(drop=True)
+    )
+    all_game_df["id"] = all_game_df.index
+    all_game_df.to_csv(ALL_CSV_PATH, index=False, encoding="utf-8_sig")
+
+def create_tokenized_annotation_csv():
+    half_number = 1
+    number_of_comments = 100
+    random_seed = 42
+
+    ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
+    ANNOTATION_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_annotation.csv"
+    all_game_df = pd.read_csv(ALL_CSV_PATH)
+    annotation_df = all_game_df.sample(n=number_of_comments, random_state=random_seed)
+    annotation_df.to_csv(ANNOTATION_CSV_PATH, index=False, encoding="utf-8_sig")
+
+
 if __name__ == "__main__":
-    clean()
+    create_tokonized_all_csv()
+    create_tokenized_annotation_csv()

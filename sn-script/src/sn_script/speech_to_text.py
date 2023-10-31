@@ -10,6 +10,7 @@ try:
     from sn_script.config import Config
 except ModuleNotFoundError:
     import sys
+
     sys.path.append(".")
     from src.sn_script.config import Config
 
@@ -88,7 +89,6 @@ def transcribe_reason():
 
     target: str = "2014-11-04 - 20-00 Zenit Petersburg 1 - 2 Bayer Leverkusen"
     video_path = Config.base_dir / target / f"{half_number}_224p.oga"
-
 
     model = Speech2Text.from_pretrained(
         "espnet/kamo-naoyuki-mini_an4_asr_train_raw_bpe_valid.acc.best"

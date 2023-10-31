@@ -1,3 +1,4 @@
+from __future__ import annotations
 import csv
 import json
 from pathlib import Path
@@ -5,14 +6,22 @@ from .config import Config
 
 
 # JSONデータをPythonの辞書として読み込む
-def write_csv(data, output_csv_path):
-    # CSVファイルに変換
+def write_csv(data: dict | list, output_csv_path: str | Path):
+    """CSVファイルに変換"""
+
+    # JSONデータをPythonの辞書として読み込んだ場合、segmentsの中身だけを抽出する
+    if isinstance(data, dict):
+        data = data["segments"]
+
+    if not isinstance(data, list):
+        raise ValueError("data must be list or dict, but got {}".format(type(data)))
+
     with open(output_csv_path, "w", newline="", encoding="utf_8_sig") as csvfile:
         writer = csv.writer(csvfile)
         # ヘッダを書き込む
-        writer.writerow(["id", "start", "end", "text", "大分類", "小分類"])
+        writer.writerow(["id", "start", "end", "text", "大分類", "小分類", "備考"])
         # 各segmentから必要なデータを抽出してCSVに書き込む
-        for segment in data["segments"]:
+        for segment in data:
             writer.writerow(
                 [
                     segment["id"],
@@ -21,9 +30,10 @@ def write_csv(data, output_csv_path):
                     segment["text"],
                     "",
                     "",
+                    "",
                 ]
             )
-    print("CSVファイルが生成されました。")
+    print(f"CSVファイルが生成されました。:{output_csv_path}")
 
 
 def seconds_to_gametime(seconds):
