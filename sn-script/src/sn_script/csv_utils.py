@@ -97,8 +97,10 @@ def create_tokonized_all_csv():
     all_game_df = (
         all_game_df
         .reindex(columns=["id", "game", "start", "end", "text", "大分類", "小分類", "備考"])
+        .sort_values(by=["game", "start", "end"],ascending=[True, True, True])
         .reset_index(drop=True)
     )
+
     all_game_df["id"] = all_game_df.index
     all_game_df.to_csv(ALL_CSV_PATH, index=False, encoding="utf-8_sig")
 
@@ -110,6 +112,7 @@ def create_tokenized_annotation_csv():
     ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
     ANNOTATION_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_annotation.csv"
     all_game_df = pd.read_csv(ALL_CSV_PATH)
+
     annotation_df = all_game_df.sample(n=number_of_comments, random_state=random_seed)
     annotation_df.to_csv(ANNOTATION_CSV_PATH, index=False, encoding="utf-8_sig")
 

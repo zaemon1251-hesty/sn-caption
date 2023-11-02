@@ -178,9 +178,8 @@ def denoise_sentenses(half_number: int):
         dump_denoised_data(denoised_data, denoised_txt_path, denoised_jsonl_path)
 
 
-def round_down():
+def round_down(half_number: int):
     """小数点を2桁に丸める"""
-    half_number = 1
     for target in Config.targets:
         target: str = target.rstrip("/").split("/")[-1]
         tokenized_jsonl_path = (
@@ -200,9 +199,10 @@ def round_down():
 
 def main():
     half_number = 1
-    # denoise_sentenses(half_number)
-    # tokenize_sentense(half_number)
-    # create_tokenized_data(half_number)
+    denoise_sentenses(half_number)
+    tokenize_sentense(half_number)
+    create_tokenized_data(half_number)
+    round_down(half_number)
     create_csv_tokenized_sentenses(half_number)
 
 
