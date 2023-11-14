@@ -95,22 +95,27 @@ def create_tokonized_all_csv():
 
     all_game_df = pd.concat(df_list)
     all_game_df = (
-        all_game_df
-        .reindex(columns=["id", "game", "start", "end", "text", "大分類", "小分類", "備考"])
-        .sort_values(by=["game", "start", "end"],ascending=[True, True, True])
+        all_game_df.reindex(
+            columns=["id", "game", "start", "end", "text", "大分類", "小分類", "備考"]
+        )
+        .sort_values(by=["game", "start", "end"], ascending=[True, True, True])
         .reset_index(drop=True)
     )
 
     all_game_df["id"] = all_game_df.index
     all_game_df.to_csv(ALL_CSV_PATH, index=False, encoding="utf-8_sig")
 
+
 def create_tokenized_annotation_csv():
     half_number = 1
     number_of_comments = 100
-    random_seed = 42
+    random_seed = 10
 
     ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
-    ANNOTATION_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_annotation.csv"
+    ANNOTATION_CSV_PATH = (
+        Config.base_dir
+        / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
+    )
     all_game_df = pd.read_csv(ALL_CSV_PATH)
 
     annotation_df = all_game_df.sample(n=number_of_comments, random_state=random_seed)
@@ -118,5 +123,4 @@ def create_tokenized_annotation_csv():
 
 
 if __name__ == "__main__":
-    create_tokonized_all_csv()
     create_tokenized_annotation_csv()
