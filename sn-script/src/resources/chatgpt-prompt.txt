@@ -40,69 +40,29 @@ system:
 以下の例を参考にしてください:
 
 user:
-- comment
-  - Still standing firm, 25 minutes gone, 0-0.
-- game
-  - 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
-- previous_comments
-  - Some good forwards here, was it the heel of Chambers that just took it away?
-  - Just there.
-  - It's an important touch.
-  - Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces.
-  - These are always awkward to defend.
+  - comment => Still standing firm, 25 minutes gone, 0-0.
+  - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
+  - previous_comments => Some good forwards here, was it the heel of Chambers that just took it away? Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
 assistant:
-{
-    "category": [2, 3],
-    "subcategory": [2.3, null]
-}
+  {"category": [2, 3], "subcategory": [2.3, null]}
 
 user:
-- comment
-  - Sneijder.
-- game
-  - 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
-- previous_comments
-  - Thiago.
-  - Konke.
-  - Umut Bulut.
-  - Burak Yilmaz.
-  - Thiago.
+  - comment => Sneijder.
+  - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
+  - previous_comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
 assistant:
-{
-    "category": [1],
-    "subcategory": [null]
-}
+  {"category": [1], "subcategory": [null]}
 
 user:
-- comment
-  - Six of them were free kicks.
-- game
-  - 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
-- previous_comments
-  - What an impact he can have.
-  - Is he who takes the corner kick?
-  - Wendel sends it back.
-  - It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position.
-  - Eight Bundesliga goals last season for Çalhanoğlu.
+  - comment => Six of them were free kicks.
+  - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
+  - previous_comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
 assistant:
-{
-    "category": [2],
-    "subcategory": [1.4]
-}
+  {"category": [2], "subcategory": [1.4]}
 
 user:
-- comment
-  - As a central defender, I don't know how Badr is under pressure.
-- game
-  - 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
-- previous_comments
-  - Once again Werner, the flags go up when he goes there.
-  - That's again under the motto, should I dissolve myself in the air?
-  - But again, good, but actually Kaiser slipped away beforehand.
-  - And here it is not a free kick.
-  - The reds have already seen that correctly.
+- comment => As a central defender, I don't know how Badr is under pressure.
+- game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
+- previous_comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
 assistant:
-{
-    "category": [3],
-    "subcategory": [null]
-}
+{"category": [3], "subcategory": [null]}

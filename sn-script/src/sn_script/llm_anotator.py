@@ -54,7 +54,9 @@ def main():
     model_type = "gpt-3.5-turbo-1106"
     print(prompt_config)
     print(get_messages(target_comment_id))
-    print(classify_comment(model_type, target_comment_id))
+    print(
+        classify_comment(model_type, target_comment_id)
+    )  # {'category': [1, 2], 'subcategory': [1.8, None]}
 
 
 def classify_comment(model_type: str, comment_id: int) -> dict:
