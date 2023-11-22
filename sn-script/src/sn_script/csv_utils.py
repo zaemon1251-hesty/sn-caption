@@ -109,7 +109,7 @@ def create_tokonized_all_csv():
 def create_tokenized_annotation_csv():
     half_number = 1
     number_of_comments = 100
-    random_seed = 10
+    random_seed = 42
 
     ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
     ANNOTATION_CSV_PATH = (
@@ -124,3 +124,4 @@ def create_tokenized_annotation_csv():
 
 if __name__ == "__main__":
     create_tokenized_annotation_csv()
+42_denoised_1_tokenized_224p_annotation

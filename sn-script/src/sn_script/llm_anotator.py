@@ -39,24 +39,51 @@ PROMPT_YAML_PATH = (
 
 # load csv
 all_comment_df = pd.read_csv(ALL_CSV_PATH)
+category_name = "大分類"
+subcategory_name = "小分類"
 
 # load yaml
 prompt_config = yaml.safe_load(open(PROMPT_YAML_PATH, "r"))
 
 
 def main():
-    logger.add(
-        "logs/llm_anotator_{time}.log".format(
-            time=datetime.now().strftime("%Y%m%d-%H%M%S")
-        ),
-    )
-    target_comment_id = 833
+    time_str = datetime.now().strftime("%Y%m%d-%H%M%S")
+
     model_type = "gpt-3.5-turbo-1106"
-    print(prompt_config)
-    print(get_messages(target_comment_id))
-    print(
-        classify_comment(model_type, target_comment_id)
-    )  # {'category': [1, 2], 'subcategory': [1.8, None]}
+
+    LLM_ANOTATION_CSV_PATH = (
+        Config.base_dir / f"{random_seed}_{half_number}_llm_annotation.csv"
+    )
+
+    logger.add(
+        "logs/llm_anotator_{time}.log".format(time=time_str),
+    )
+
+    annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
+
+    def fill_category(row):
+        comment_id = row["id"]
+        if not pd.isnull(row[category_name]):
+            return row[category_name], row[subcategory_name]
+        try:
+            result = classify_comment(model_type, comment_id)
+            logger.info(f"comment_id:{comment_id},result:{result}")
+            category = result.get("category")
+            subcategory = result.get("subcategory")
+            logger.info(f"comment_id={comment_id} is annotated.")
+            return category, subcategory
+        except Exception as e:
+            logger.error(f"comment_id={comment_id} is not annotated.")
+            logger.error(e)
+            return None, None
+
+    annotation_df[[category_name, subcategory_name]] = annotation_df.apply(
+        lambda r: fill_category(r), axis=1, result_type="expand"
+    )
+    annotation_df.to_csv(LLM_ANOTATION_CSV_PATH, index=False)
+
+    # print(classify_comment(model_type, 833))
+    # # {'category': [1, 2], 'subcategory': [1.8, None]}
 
 
 def classify_comment(model_type: str, comment_id: int) -> dict:
