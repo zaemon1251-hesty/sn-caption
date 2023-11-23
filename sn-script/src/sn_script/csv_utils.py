@@ -1,5 +1,8 @@
 import pandas as pd
 from collections import defaultdict
+from pathlib import Path
+import ast
+import pprint
 
 try:
     from sn_script.config import Config
@@ -11,36 +14,52 @@ except ModuleNotFoundError:
     from src.sn_script.config import Config
 
 
-def get_gig_class_ratio(half_number: int):
-    df_list = []
+category_name = "大分類"
+subcategory_name = "小分類"
 
-    for target in Config.targets:
-        target: str = target.rstrip("/").split("/")[-1]
-        csv_path = Config.base_dir / target / f"{half_number}_224p.csv"
-        tmp_df = pd.read_csv(csv_path)
-        df_list.append(tmp_df)
+random_seed = 42
+half_number = 1
 
-    all_game_df = pd.concat(df_list)
-    filled_big_class_df = all_game_df.loc[all_game_df["大分類"] != ""].reset_index(
-        drop=True
+HUMAN_ANOTATION_CSV_PATH = (
+    Config.base_dir / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
+)
+
+
+def output_label_statistics(csv_path: str | Path):
+    label_counts = get_categories_ratio(csv_path)
+    result = pprint.pformat(label_counts, depth=2, width=40, indent=2)
+    print(result)
+
+
+def get_categories_ratio(csv_path: str | Path):
+    all_game_df = pd.read_csv(csv_path)
+    filled_category_df = all_game_df
+    all_game_df[category_name] = all_game_df[category_name].apply(
+        lambda r: ast.literal_eval(r)
+    )
+    all_game_df[subcategory_name] = all_game_df[subcategory_name].apply(
+        lambda r: ast.literal_eval(r)
     )
 
     # 大分類はマルチラベルなので、大分類の数はデータ数よりも多い
     # 大分類のマルチラベルを分割して数える
-    filled_big_class_df["大分類"] = filled_big_class_df["大分類"].astype(str)
 
-    # ユニークラベルを
-    label_counts = defaultdict(int)
+    # ユニークラベルの数を数える
+    label_counts = {
+        category_name: defaultdict(int),
+        subcategory_name: defaultdict(int),
+    }
 
-    # Iterate over the '大分類' column
-    for value in filled_big_class_df["大分類"]:
-        # Split the value by space and strip extra spaces
-        labels = value
-        label_counts[labels] += 1
+    # Iterate over the  column
+    for column in [category_name, subcategory_name]:
+        for values in filled_category_df[column]:
+            # Split the value by space and strip extra spaces
+            assert isinstance(values, list)
+            for value in values:
+                labels = value
+                label_counts[column][labels] += 1
 
-    # Convert the dictionary to a sorted list of tuples for readability
-    label_counts = sorted(label_counts.items(), key=lambda x: x[1], reverse=True)
-    print(label_counts)
+    return label_counts
 
 
 def get_average_num_comments(half_number: int) -> int:
@@ -53,7 +72,7 @@ def get_average_num_comments(half_number: int) -> int:
     return sum(lens) / len(lens)
 
 
-def dump_filled_coments(half_number: int):
+def dump_filled_comments(half_number: int):
     DUMP_FILE_PATH = f"filled_big_class_{half_number}.csv"
 
     df_list = []
@@ -66,7 +85,7 @@ def dump_filled_coments(half_number: int):
 
     all_game_df = pd.concat(df_list)
     filled_big_class_df = all_game_df.loc[
-        all_game_df["大分類"].isnull() == False
+        ~all_game_df[category_name].isnull()
     ].reset_index(drop=True)
     filled_big_class_df.to_csv(DUMP_FILE_PATH, index=False)
 
@@ -96,7 +115,16 @@ def create_tokonized_all_csv():
     all_game_df = pd.concat(df_list)
     all_game_df = (
         all_game_df.reindex(
-            columns=["id", "game", "start", "end", "text", "大分類", "小分類", "備考"]
+            columns=[
+                "id",
+                "game",
+                "start",
+                "end",
+                "text",
+                category_name,
+                subcategory_name,
+                "備考",
+            ]
         )
         .sort_values(by=["game", "start", "end"], ascending=[True, True, True])
         .reset_index(drop=True)
@@ -113,8 +141,7 @@ def create_tokenized_annotation_csv():
 
     ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
     ANNOTATION_CSV_PATH = (
-        Config.base_dir
-        / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
+        Config.base_dir / f"{random_seed}_{half_number}_tokenized_224p_annotation.csv"
     )
     all_game_df = pd.read_csv(ALL_CSV_PATH)
 
@@ -123,5 +150,5 @@ def create_tokenized_annotation_csv():
 
 
 if __name__ == "__main__":
-    create_tokenized_annotation_csv()
-42_denoised_1_tokenized_224p_annotation
+    # create_tokenized_annotation_csv()
+    output_label_statistics(HUMAN_ANOTATION_CSV_PATH)
