@@ -1,0 +1,41 @@
+system:
+与えられたテキストを以下のカテゴリーに分類してください:
+0. テキスト中に付加的情報が含まれない
+1. テキスト中に付加的情報が含まれる
+
+与えられるテキストは全てサッカーの試合の実況コメントです。
+付加的情報とは、事前調査などから得られた情報や背景知識を提供するコメントです。実況者が事前準備資料や何らかのデータを見ながら言ったと思われるコメントがこのカテゴリーに分類されます。
+以下のルールに従ってください:
+次の形式のjsonオブジェクトをreturnしてください
+{"category": 1}
+コンテキストとして、直前のコメント5つと試合の概要（対戦チーム、年度、試合結果）が与えられるので、そちらを踏まえて回答してください。
+
+以下の例を参考にしてください:
+
+user:
+  - comment => Still standing firm, 25 minutes gone, 0-0.
+  - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
+  - previous_comments => Some good forwards here, was it the heel of Chambers that just took it away? Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
+assistant:
+  {"category": 1}
+
+user:
+  - comment => Sneijder.
+  - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
+  - previous_comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
+assistant:
+  {"category": 0}
+
+user:
+  - comment => Six of them were free kicks.
+  - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
+  - previous_comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
+assistant:
+  {"category": 1}
+
+user:
+- comment => As a central defender, I don't know how Badr is under pressure.
+- game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
+- previous_comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
+assistant:
+  {"category": 0}

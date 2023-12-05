@@ -3,6 +3,9 @@ import pandas as pd
 from typing_extensions import TypedDict
 import ast
 from loguru import logger
+import evaluate
+
+from abc import ABC
 
 try:
     from sn_script.config import Config
@@ -12,17 +15,18 @@ except ModuleNotFoundError:
     sys.path.append(".")
     from src.sn_script.config import Config
 
-
+binary_category_name = "付加的情報か"
 category_name = "大分類"
 subcategory_name = "小分類"
 
 random_seed = 42
 half_number = 1
-model_type = "gpt-3.5-turbo-1106"
+# model_type = "gpt-3.5-turbo-1106"
+model_type = "gpt-4-1106-preview"
 
 
 LLM_ANOTATION_CSV_PATH = (
-    Config.base_dir / f"{random_seed}_{half_number}_llm_annotation.csv"
+    Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
 )
 HUMAN_ANOTATION_CSV_PATH = (
     Config.base_dir / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
@@ -39,29 +43,23 @@ class LlmAnnotationResult(TypedDict):
     half_number: int
     comment_ids: int
     category: EvalIndicator
-    subcategory: EvalIndicator
+    subcategory: EvalIndicator | None
 
 
 class EvalIndicator(TypedDict):
-    """
-    Mohammad S Sorower,
-    A Literature Survey on Algorithms for Multi-label Learning, 2010.
-
-    Exact Match Ratio (EMR) = mean^{n}_{i=1} (Yi = Zi)
-    F1 = 2 * (Precision * Recall) / (Precision + Recall)
-    Precision = mean^{n}_{i=1} (Yi \bigcap Zi) / Zi
-    Recall = mean^{n}_{i=1} (Yi \bigcap Zi) / Yi
-    Accuracy = mean^{n}_{i=1} (Yi \bigcap Zi) / (Yi \bigcup Zi)
-    """
-
-    exact_match: float
+    exact_match: float | None
     f1: float
     precision: float
     recall: float
     accuracy: float
 
 
-class EvaluateAnnotation:
+class EvaluateAnnotationBase(ABC):
+    def evaluate(self) -> LlmAnnotationResult:
+        raise NotImplementedError
+
+
+class EvaluateAnnotationMultilabel(EvaluateAnnotationBase):
     """calculate evaluation metrics for annotation"""
 
     def __init__(self) -> None:
@@ -85,6 +83,16 @@ class EvaluateAnnotation:
         )
 
     def evaluate(self) -> LlmAnnotationResult:
+        """
+        Mohammad S Sorower,
+        A Literature Survey on Algorithms for Multi-label Learning, 2010.
+
+        Exact Match Ratio (EMR) = mean^{n}_{i=1} (Yi = Zi)
+        F1 = 2 * (Precision * Recall) / (Precision + Recall)
+        Precision = mean^{n}_{i=1} (Yi \bigcap Zi) / Zi
+        Recall = mean^{n}_{i=1} (Yi \bigcap Zi) / Yi
+        Accuracy = mean^{n}_{i=1} (Yi \bigcap Zi) / (Yi \bigcup Zi)
+        """
         category_result = self._calculate(category_name)
         subcategory_result = self._calculate(subcategory_name)
         result = LlmAnnotationResult(
@@ -122,6 +130,78 @@ class EvaluateAnnotation:
 
         return EvalIndicator(
             exact_match=er, accuracy=accuracy, precision=precision, recall=recall, f1=f1
+        )
+
+
+class EvaluateAnnotationSingle(EvaluateAnnotationBase):
+    """calculate evaluation metrics for annotation"""
+
+    def __init__(self) -> None:
+        human_df = pd.read_csv(HUMAN_ANOTATION_CSV_PATH)
+        llm_df = pd.read_csv(LLM_ANOTATION_CSV_PATH)
+
+        assert human_df.shape == llm_df.shape
+        assert human_df["id"].equals(llm_df["id"])
+
+        self.llm_human_df = pd.merge(
+            llm_df,
+            human_df,
+            how="inner",
+            on="id",
+            suffixes=("_llm", "_human"),
+        )
+        self.accuracy_runner = evaluate.load("accuracy")
+        self.precision_runner = evaluate.load("precision")
+        self.recall_runner = evaluate.load("recall")
+        self.f1_runner = evaluate.load("f1")
+
+    def evaluate(self) -> LlmAnnotationResult:
+        """
+        Precision =
+                        true positives
+                        true positives + false positives
+        Recall =
+                true positives
+                true positives + false negatives
+        Fβ =
+                (β2 +1)PR
+                β2P+R
+        Accuracy =
+                true positives + true negatives
+                true positives + true negatives + false positives + false negatives
+        """
+        category_result = self._calculate(binary_category_name)
+        result = LlmAnnotationResult(
+            model_type=model_type,
+            random_seed=random_seed,
+            half_number=half_number,
+            comment_ids=self.llm_human_df["id"].tolist(),
+            category=category_result,
+            subcategory=None,
+        )
+        return result
+
+    def _calculate(self, col_name) -> EvalIndicator:
+        references = self.llm_human_df[col_name + "_human"].tolist()
+        predictioins = self.llm_human_df[col_name + "_llm"].tolist()
+
+        accuracy = self.accuracy_runner.compute(
+            references=references, predictions=predictioins
+        )
+        precision = self.precision_runner.compute(
+            references=references, predictions=predictioins
+        )
+        recall = self.recall_runner.compute(
+            references=references, predictions=predictioins
+        )
+        f1 = self.f1_runner.compute(references=references, predictions=predictioins)
+
+        return EvalIndicator(
+            exact_match=None,
+            accuracy=accuracy,
+            precision=precision,
+            recall=recall,
+            f1=f1,
         )
 
 
@@ -184,7 +264,7 @@ if __name__ == "__main__":
         )
     )
     # preprocess_human_annotation()
-    evaluator = EvaluateAnnotation()
+    evaluator = EvaluateAnnotationSingle()
     result = evaluator.evaluate()
     logger.info(result)
     # {'category': [1, 2], 'subcategory': [1.8, None]}

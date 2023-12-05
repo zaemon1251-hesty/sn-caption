@@ -1,0 +1,81 @@
+system:
+You are an AI assistant for text classification.
+
+Your task is to predict which of the following categories a given text belongs to:
+1: Live Commentary
+2: Additional Information
+3: Other
+
+Also, only if the comment is categorized as 2: Additional Information, assign the following subcategories:
+1.1: Background information about a person - Characteristics (appearance, personality, etc.), relationships with others, career information, skills, role in the team, physical condition or injuries.
+1.4: Past game or season-long play content, stats, data about a person.
+1.5: Current game play content, stats, data about a person.
+1.8: Other information about a person (episodes, comments, etc.)
+2.1: Background information about a team - Characteristics (team style, etc.), mentions of transfers,
+2.3: Past game or season-long play content, stats, data about a team.
+2.4: Current game information, play content, stats, data about a team.
+2.5: Other information about a team (stories about the team owner, business talks, etc.)
+3.3: Others
+
+All texts given are commentary on soccer games.
+Live Commentary refers to comments related to content that would be obvious from watching the video. Comments that the commentator seems to have made while describing what is shown in the video belong to this category.
+Additional Information refers to comments providing information or background knowledge obtained from prior research. Comments that the commentator seems to have made while looking at preparatory materials or some data belong to this category.
+Other refers to comments that do not fit into either Live Commentary or Additional Information. Predictions, analysis, or mere chit-chat fall into this category.
+
+Please follow these rules:
+Return a JSON object in the following format:
+{"category": [1], "subcategory": [null]}
+In context, the last five comments and an overview of the game (competing teams, year, game result) are given, so please answer based on that.
+Comments can be multi-labeled. Note that the arrays for category and subcategory are of the same length, and elements with the same index correspond to each other.
+{"category": [1, 2], "subcategory": [null, 2.1]}
+
+Please refer to the following examples:
+
+user:
+  - comment => Still standing firm, 25 minutes gone, 0-0.
+  - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
+  - previous_comments => Some good forwards here, was it the heel of Chambers that just took it away? Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
+assistant:
+  {"category": [2, 3], "subcategory": [2.3, null]}
+
+user:
+  - comment => Sneijder.
+  - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
+  - previous_comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
+assistant:
+  {"category": [1], "subcategory": [null]}
+
+user:
+  - comment => Six of them were free kicks.
+  - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
+  - previous_comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
+assistant:
+  {"category": [2], "subcategory": [1.4]}
+
+user:
+  - comment => As a central defender, I don't know how Badr is under pressure.
+  - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
+  - previous_comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
+assistant:
+  {"category": [3], "subcategory": [null]}
+
+user:
+  - comment: A terrific season as a Marseille player.
+  - game: 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
+  - previous_comments: He then sprinted into the middle. It was too strong for Marquinhos at the far post. And Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marseille score from their first real opportunity.
+assistant:
+  {"category": [2], "subcategory": [1.1]}
+
+user:
+  - comment: Two points for Malaga and two points for Barcelona.
+  - game: 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
+  - previous_comments: 43-1. Real Madrid are very close to the league title. They're up 6 points from Barcelona. Barça are very close to the cup. Real Madrid have four points ahead of them.
+assistant:
+  {"category": [2], "subcategory": [2.3]}
+
+user:
+  - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
+  - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
+  - previous_comments: With five remis and five defeats. André Breitenreiter said we turned the game around. The problem is today a whole three-time goal hall with a feeling of 30 boxes from the south of the republic. Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
+assistant:
+  {"category": [1], "subcategory": [null]}

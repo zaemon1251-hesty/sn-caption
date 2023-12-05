@@ -14,6 +14,7 @@ except ModuleNotFoundError:
     from src.sn_script.config import Config
 
 
+binary_category_name = "付加的情報か"
 category_name = "大分類"
 subcategory_name = "小分類"
 
@@ -22,6 +23,13 @@ half_number = 1
 
 HUMAN_ANOTATION_CSV_PATH = (
     Config.base_dir / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
+)
+ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
+DENISED_TOKENIZED_CSV_TEMPLATE = f"denoised_{half_number}_tokenized_224p.csv"
+
+ANNOTATION_CSV_PATH = (
+    Config.base_dir
+    / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
 )
 
 
@@ -101,8 +109,6 @@ def clean():
 
 def create_tokonized_all_csv():
     half_number = 1
-    ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
-    DENISED_TOKENIZED_CSV_TEMPLATE = f"denoised_{half_number}_tokenized_224p.csv"
 
     df_list = []
     for target in Config.targets:
@@ -134,15 +140,30 @@ def create_tokonized_all_csv():
     all_game_df.to_csv(ALL_CSV_PATH, index=False, encoding="utf-8_sig")
 
 
-def create_tokenized_annotation_csv():
-    half_number = 1
-    number_of_comments = 100
-    random_seed = 42
+def add_column_to_csv():
+    # all_game_df = pd.read_csv(ALL_CSV_PATH)
+    annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
 
-    ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
-    ANNOTATION_CSV_PATH = (
-        Config.base_dir / f"{random_seed}_{half_number}_tokenized_224p_annotation.csv"
-    )
+    # all_game_df[binary_category_name] = pd.NA
+    annotation_df[binary_category_name] = pd.NA
+    column_order = [
+        "id",
+        "game",
+        "start",
+        "end",
+        "text",
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        "備考",
+    ]
+    # all_game_df = all_game_df.reindex(columns=column_order)
+    annotation_df = annotation_df.reindex(columns=column_order)
+    # all_game_df.to_csv(ALL_CSV_PATH, index=False, encoding="utf-8_sig")
+    annotation_df.to_csv(ANNOTATION_CSV_PATH, index=False, encoding="utf-8_sig")
+
+
+def create_tokenized_annotation_csv(number_of_comments: int = 100):
     all_game_df = pd.read_csv(ALL_CSV_PATH)
 
     annotation_df = all_game_df.sample(n=number_of_comments, random_state=random_seed)
@@ -151,4 +172,5 @@ def create_tokenized_annotation_csv():
 
 if __name__ == "__main__":
     # create_tokenized_annotation_csv()
-    output_label_statistics(HUMAN_ANOTATION_CSV_PATH)
+    # output_label_statistics(HUMAN_ANOTATION_CSV_PATH)
+    add_column_to_csv()

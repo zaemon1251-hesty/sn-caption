@@ -28,6 +28,16 @@ client = OpenAI(
 random_seed = 42
 half_number = 1
 
+#
+binary_category_name = "付加的情報か"
+category_name = "大分類"
+subcategory_name = "小分類"
+
+#
+# model_type = "gpt-3.5-turbo-1106"
+model_type = "gpt-4-1106-preview"
+
+
 ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
 ANNOTATION_CSV_PATH = (
     Config.base_dir
@@ -37,10 +47,13 @@ PROMPT_YAML_PATH = (
     Config.base_dir.parent / "sn-script" / "src" / "resources" / "classify_comment.yaml"
 )
 
+LLM_ANOTATION_CSV_PATH = (
+    Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+)
+
+
 # load csv
 all_comment_df = pd.read_csv(ALL_CSV_PATH)
-category_name = "大分類"
-subcategory_name = "小分類"
 
 # load yaml
 prompt_config = yaml.safe_load(open(PROMPT_YAML_PATH, "r"))
@@ -48,12 +61,6 @@ prompt_config = yaml.safe_load(open(PROMPT_YAML_PATH, "r"))
 
 def main():
     time_str = datetime.now().strftime("%Y%m%d-%H%M%S")
-
-    model_type = "gpt-3.5-turbo-1106"
-
-    LLM_ANOTATION_CSV_PATH = (
-        Config.base_dir / f"{random_seed}_{half_number}_llm_annotation.csv"
-    )
 
     logger.add(
         "logs/llm_anotator_{time}.log".format(time=time_str),
@@ -77,8 +84,26 @@ def main():
             logger.error(e)
             return None, None
 
-    annotation_df[[category_name, subcategory_name]] = annotation_df.apply(
-        lambda r: fill_category(r), axis=1, result_type="expand"
+    def fill_category_binary(row):
+        comment_id = row["id"]
+        if not pd.isnull(row[binary_category_name]):
+            return row[binary_category_name]
+        try:
+            result = classify_comment(model_type, comment_id)
+            logger.info(f"comment_id:{comment_id},result:{result}")
+            category = result.get("category")
+            logger.info(f"comment_id={comment_id} is annotated.")
+            return category
+        except Exception as e:
+            logger.error(f"comment_id={comment_id} couldn't be annotated.")
+            logger.error(e)
+            return None
+
+    # annotation_df[[category_name, subcategory_name]] = annotation_df.apply(
+    #     lambda r: fill_category(r), axis=1, result_type="expand"
+    # )
+    annotation_df[binary_category_name] = annotation_df.apply(
+        lambda r: fill_category_binary(r), axis=1
     )
     annotation_df.to_csv(LLM_ANOTATION_CSV_PATH, index=False)
 
@@ -98,17 +123,17 @@ def classify_comment(model_type: str, comment_id: int) -> dict:
         "response_format": {"type": "json_object"},
     }
     response = client.chat.completions.create(**completion_params)
-    if response.choices[0].message.content is None:
+    content = response.choices[0].message.content
+    if content is None:
         return {}
     else:
-        return json.loads(response.choices[0].message.content)
+        return json.loads(content)
 
 
 def get_messages(comment_id: int) -> list[str]:
     messages = []
 
-    target_comment = all_comment_df.iloc[comment_id]
-    if target_comment.empty:
+    if comment_id not in all_comment_df.index:
         raise ValueError(f"comment_id={comment_id} is not found.")
 
     description = prompt_config["description"]
@@ -135,6 +160,20 @@ def get_messages(comment_id: int) -> list[str]:
         )
 
     # max_history = 5 & game == game
+
+    target_prompt = create_target_prompt(comment_id)
+    messages.append(
+        {
+            "role": "user",
+            "content": target_prompt,
+        }
+    )
+    return messages
+
+
+def create_target_prompt(comment_id: int) -> str:
+    target_comment = all_comment_df.iloc[comment_id]
+
     previous_comments = (
         all_comment_df[
             (all_comment_df["game"] == target_comment["game"])
@@ -147,17 +186,12 @@ def get_messages(comment_id: int) -> list[str]:
     target_prompt_args = PromptArgments(
         target_comment["text"], target_comment["game"], previous_comments
     )
-    target_prompt = create_target_prompt(target_prompt_args)
-    messages.append(
-        {
-            "role": "user",
-            "content": target_prompt,
-        }
-    )
-    return messages
+
+    message = _create_target_prompt(target_prompt_args)
+    return message
 
 
-def create_target_prompt(prompt_args: PromptArgments) -> str:
+def _create_target_prompt(prompt_args: PromptArgments) -> str:
     """分類対象のコメントに関するプロンプトを作成する"""
 
     message = f"""
@@ -171,3 +205,23 @@ def create_target_prompt(prompt_args: PromptArgments) -> str:
 
 if __name__ == "__main__":
     main()
+
+    # ChatGPT用のプロンプトを作成する
+    TARGET_PROMPT_CSV_PATH = (
+        Config.base_dir.parent
+        / "sn-script"
+        / "src"
+        / "resources"
+        / f"{random_seed}_{half_number}_target_prompt.csv"
+    )
+
+    def output_target_prompt():
+        annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
+        targe_prompt_list = []
+        for comment_id in annotation_df["id"]:
+            targe_prompt_list.append(create_target_prompt(comment_id))
+
+        with open(TARGET_PROMPT_CSV_PATH, "w") as f:
+            f.write("\n".join(targe_prompt_list))
+
+    # output_target_prompt()
