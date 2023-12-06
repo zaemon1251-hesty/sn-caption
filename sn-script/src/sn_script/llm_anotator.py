@@ -9,12 +9,28 @@ from loguru import logger
 from datetime import datetime
 
 try:
-    from sn_script.config import Config
+    from sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
 except ModuleNotFoundError:
     import sys
 
     sys.path.append(".")
-    from src.sn_script.config import Config
+    from src.sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
 
 # プロンプト作成用の引数
 PromptArgments = namedtuple("PromptArgments", ["comment", "game", "previous_comments"])
@@ -23,19 +39,6 @@ PromptArgments = namedtuple("PromptArgments", ["comment", "game", "previous_comm
 client = OpenAI(
     api_key=os.environ["OPENAI_API_KEY"],
 )
-
-# 利用ファイルの設定
-random_seed = 42
-half_number = 1
-
-#
-binary_category_name = "付加的情報か"
-category_name = "大分類"
-subcategory_name = "小分類"
-
-#
-# model_type = "gpt-3.5-turbo-1106"
-model_type = "gpt-4-1106-preview"
 
 
 ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 
+# 　分析対象のデータセットのパス
 class Config:
     base_dir = Path(__file__).parent.parent.parent.parent / "data"
     targets = [
@@ -22,3 +23,17 @@ class Config:
         "SoccerNet/spain_laliga/2016-2017/2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid/",
         "SoccerNet/spain_laliga/2019-2020/2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid/",
     ]
+
+
+# 分析対象のカラム名
+binary_category_name = "付加的情報か"
+category_name = "大分類"
+subcategory_name = "小分類"
+
+
+# ターゲットの設定
+random_seed = 42
+half_number = 1
+
+# 使用するLLMのモデル名
+model_type = "gpt-3.5-turbo-1106"

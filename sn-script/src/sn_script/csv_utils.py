@@ -5,21 +5,29 @@ import ast
 import pprint
 
 try:
-    from sn_script.config import Config
+    from sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
     from sn_script.json2csv import write_csv
 except ModuleNotFoundError:
     import sys
 
     sys.path.append(".")
-    from src.sn_script.config import Config
-
-
-binary_category_name = "付加的情報か"
-category_name = "大分類"
-subcategory_name = "小分類"
-
-random_seed = 42
-half_number = 1
+    from src.sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
 
 HUMAN_ANOTATION_CSV_PATH = (
     Config.base_dir / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
@@ -31,12 +39,30 @@ ANNOTATION_CSV_PATH = (
     Config.base_dir
     / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
 )
+LLM_ANOTATION_CSV_PATH = (
+    Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+)
 
 
-def output_label_statistics(csv_path: str | Path):
+def output_label_statistics(csv_path: str | Path, binary: bool = False):
+    if binary:
+        label_counts = get_binary_categories_ratio(csv_path)
+        print(label_counts)
+        return
+
     label_counts = get_categories_ratio(csv_path)
     result = pprint.pformat(label_counts, depth=2, width=40, indent=2)
     print(result)
+
+
+def get_binary_categories_ratio(csv_path: str | Path):
+    all_game_df = pd.read_csv(csv_path)
+    label_counts = {
+        binary_category_name: defaultdict(int),
+    }
+    for values in all_game_df[binary_category_name]:
+        label_counts[binary_category_name][values] += 1
+    return label_counts
 
 
 def get_categories_ratio(csv_path: str | Path):
@@ -172,5 +198,5 @@ def create_tokenized_annotation_csv(number_of_comments: int = 100):
 
 if __name__ == "__main__":
     # create_tokenized_annotation_csv()
-    # output_label_statistics(HUMAN_ANOTATION_CSV_PATH)
-    add_column_to_csv()
+    output_label_statistics(LLM_ANOTATION_CSV_PATH, binary=True)
+    # add_column_to_csv()

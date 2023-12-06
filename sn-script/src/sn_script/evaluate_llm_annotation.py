@@ -8,21 +8,28 @@ import evaluate
 from abc import ABC
 
 try:
-    from sn_script.config import Config
+    from sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
 except ModuleNotFoundError:
     import sys
 
     sys.path.append(".")
-    from src.sn_script.config import Config
-
-binary_category_name = "付加的情報か"
-category_name = "大分類"
-subcategory_name = "小分類"
-
-random_seed = 42
-half_number = 1
-# model_type = "gpt-3.5-turbo-1106"
-model_type = "gpt-4-1106-preview"
+    from src.sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
 
 
 LLM_ANOTATION_CSV_PATH = (

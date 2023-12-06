@@ -6,13 +6,29 @@ from loguru import logger
 from tqdm import tqdm
 
 try:
-    from sn_script.config import Config
+    from sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
     from sn_script.json2csv import write_csv
 except ModuleNotFoundError:
     import sys
 
     sys.path.append(".")
-    from src.sn_script.config import Config
+    from src.sn_script.config import (
+        Config,
+        binary_category_name,
+        category_name,
+        subcategory_name,
+        random_seed,
+        half_number,
+        model_type,
+    )
     from src.sn_script.json2csv import write_csv
 
 
@@ -198,7 +214,6 @@ def round_down(half_number: int):
 
 
 def main():
-    half_number = 1
     denoise_sentenses(half_number)
     tokenize_sentense(half_number)
     create_tokenized_data(half_number)
