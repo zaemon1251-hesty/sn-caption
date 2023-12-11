@@ -68,6 +68,9 @@ def main():
     logger.add(
         "logs/llm_anotator_{time}.log".format(time=time_str),
     )
+    logger.info(f"model_type:{model_type}")
+    logger.info(f"random_seed:{random_seed}")
+    logger.info(f"half_number:{half_number}")
 
     annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
 
@@ -176,13 +179,14 @@ def get_messages(comment_id: int) -> list[str]:
 
 def create_target_prompt(comment_id: int) -> str:
     target_comment = all_comment_df.iloc[comment_id]
+    context_length = 2
 
     previous_comments = (
         all_comment_df[
             (all_comment_df["game"] == target_comment["game"])
             & (all_comment_df.index < comment_id)
         ]
-        .tail(5)["text"]
+        .tail(context_length)["text"]
         .tolist()
     )
 

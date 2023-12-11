@@ -1,41 +1,56 @@
-system:
-与えられたテキストを以下のカテゴリーに分類してください:
-0. テキスト中に付加的情報が含まれない
-1. テキスト中に付加的情報が含まれる
+システム：
+与えられたテキストに付加的情報が含まれているかどうかを分類する。
+テキストはアナウンサーによるサッカーの試合解説である。
+付加的情報には、主観的な意見や推測、試合映像に見られる行動は含まれない。対して、現在および過去の試合、イベント、過去のインタビューから調査されたデータや統計が含まれる。
+出力はJSON形式で提供される。
+分類クラス 1 は付加的情報が含まれていることを表し、0 は含まれていないことを表す。
 
-与えられるテキストは全てサッカーの試合の実況コメントです。
-付加的情報とは、事前調査などから得られた情報や背景知識を提供するコメントです。実況者が事前準備資料や何らかのデータを見ながら言ったと思われるコメントがこのカテゴリーに分類されます。
-以下のルールに従ってください:
-次の形式のjsonオブジェクトをreturnしてください
-{"category": 1}
-コンテキストとして、直前のコメント5つと試合の概要（対戦チーム、年度、試合結果）が与えられるので、そちらを踏まえて回答してください。
-
-以下の例を参考にしてください:
-
-user:
-  - comment => Still standing firm, 25 minutes gone, 0-0.
-  - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
-  - previous_comments => Some good forwards here, was it the heel of Chambers that just took it away? Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
-assistant:
-  {"category": 1}
-
-user:
-  - comment => Sneijder.
-  - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
-  - previous_comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
-assistant:
-  {"category": 0}
-
-user:
-  - comment => Six of them were free kicks.
-  - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
-  - previous_comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
-assistant:
-  {"category": 1}
-
-user:
-- comment => As a central defender, I don't know how Badr is under pressure.
-- game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
-- previous_comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
-assistant:
-  {"category": 0}
+- 1:
+  user: |+
+    - comment => Still standing firm, 25 minutes gone, 0-0.
+    - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
+    - previous_comments => Some good forwards here, was it the heel of Chambers that just took it away? => Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
+  assistant: |
+    {"category": 1, "reason": "This comment contaions current game stats."}
+- 2:
+  user: |+
+    - comment => Sneijder.
+    - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
+    - previous_comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
+  assistant: |
+    {"category": 0, "reason": "This comment just refers a player who posses a ball."}
+- 3:
+  user: |+
+    - comment => Six of them were free kicks.
+    - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
+    - previous_comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
+  assistant: |
+    {"category": 1, "reason": "This comment contaions past person stats."}
+- 5:
+  user: |+
+    - comment => As a central defender, I don't know how Badr is under pressure.
+    - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
+    - previous_comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
+  assistant: |
+    {"category": 0, "reason": "This comment just refers feeling of a commentator."}
+- 6:
+  user: |+
+    - comment: A terrific season as a Marseille player.
+    - game: 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
+    - previous_comments: He then sprinted into the middle. It was too strong for Marquinhos at the far post. And Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marseille score from their first real opportunity.
+  assistant: |
+    {"category": 0, "reason": "This comment refers player's performance in last season but terrific is just a commentator's feeling"}
+- 7:
+  user: |+
+    - comment: Two points for Malaga and two points for Barcelona.
+    - game: 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
+    - previous_comments: 43-1. Real Madrid are very close to the league title. They're up 6 points from Barcelona. Barça are very close to the cup. Real Madrid have four points ahead of them.
+  assistant: |
+    {"category": 1, "reason": "This comment refers the standings of the teams."}
+- 8:
+  user: |+
+    - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
+    - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
+    - previous_comments: With five remis and five defeats. André Breitenreiter said we turned the game around. The problem is today a whole three-time goal hall with a feeling of 30 boxes from the south of the republic. Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
+  assistant: |
+    {"category": 0, "reason": "This comment simply refers where the players is in the game."}

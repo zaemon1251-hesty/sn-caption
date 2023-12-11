@@ -192,6 +192,21 @@ class EvaluateAnnotationSingle(EvaluateAnnotationBase):
         references = self.llm_human_df[col_name + "_human"].tolist()
         predictioins = self.llm_human_df[col_name + "_llm"].tolist()
 
+        fp = [
+            self.llm_human_df.iloc[i]["id"]
+            for i, (ref, pred) in enumerate(zip(references, predictioins))
+            if ref == 0 and pred == 1
+        ]
+
+        fn = [
+            self.llm_human_df.iloc[i]["id"]
+            for i, (ref, pred) in enumerate(zip(references, predictioins))
+            if ref == 1 and pred == 0
+        ]
+
+        logger.info(f"False Positive list:{fp}")
+        logger.info(f"False Negative list:{fn}")
+
         accuracy = self.accuracy_runner.compute(
             references=references, predictions=predictioins
         )

@@ -1,38 +1,45 @@
 system:
-Please categorize the given text into the following categories:
-0. The text does not contain additional information
-1. The text contains additional information
+Classify the given text does or does not contain supplementary information.
 
-Additional information refers to comments that provide information or background knowledge obtained from prior research. Comments that seem to be made by the commentator while referring to preparatory materials or some data fall into this category.
-Return a JSON object in the following format
-Answer taking into account the context provided, which includes the last five comments and a summary of the match (competing teams, year, match result).
+The text is a football match commentary by an announcer.
+Supplementary information excludes subjective opinions, speculations, and actions seen in the game footage.
+It includes researched data and statistics from current and past games, events, and previous interviews.
+The output is provided in JSON format.
+Class 1 represents the text contains supplementary information and 0 represents otherwise.
 
-Refer to the following examples:
 
-user:
-  - comment => Still standing firm, 25 minutes gone, 0-0.
-  - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
-  - previous_comments => Some good forwards here, was it the heel of Chambers that just took it away? Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
-assistant:
-  {"category": 1}
-
-user:
-  - comment => Sneijder.
-  - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
-  - previous_comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
-assistant:
-  {"category": 0}
-
-user:
-  - comment => Six of them were free kicks.
-  - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
-  - previous_comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
-assistant:
-  {"category": 1}
-
-user:
-- comment => As a central defender, I don't know how Badr is under pressure.
-- game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
-- previous_comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
-assistant:
-  {"category": 0}
+- 2:
+  user: |+
+    - comment => Sneijder.
+    - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
+    - previous_comments => Burak Yilmaz. Thiago.
+  assistant: |
+    {"reason": "This comment just refers a player who posses a ball.", "category": 0}
+- 3:
+  user: |+
+    - comment => Six of them were free kicks.
+    - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
+    - previous_comments => It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
+  assistant: |
+    {"reason": "This comment contaions past person stats.", "category": 1}
+- 5:
+  user: |+
+    - comment => As a central defender, I don't know how Badr is under pressure.
+    - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
+    - previous_comments => And here it is not a free kick. The reds have already seen that correctly.
+  assistant: |
+    {"reason": "This comment just refers feeling of a commentator.", "category": 0}
+- 6:
+  user: |+
+    - comment: A terrific season as a Marseille player.
+    - game: 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
+    - previous_comments: Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marseille score from their first real opportunity.
+  assistant: |
+    {"reason": "This comment refers player's performance in last season but terrific is just a commentator's feeling", "category": 0}
+- 8:
+  user: |+
+    - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
+    - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
+    - previous_comments: Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
+  assistant: |
+    { "reason": "This comment simply refers where the players is in the game.", "category": 0}
