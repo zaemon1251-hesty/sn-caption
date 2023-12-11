@@ -78,16 +78,3 @@ if __name__ == "__main__":
     half_number = 1
 
     print(translate("Hello, world!"))
-
-    # for target in Config.targets:
-    #     target: str = target.rstrip("/").split("/")[-1]
-    #     json_path = Config.base_dir / target / f"{half_number}_224p.json"
-    #     vtt_path = Config.base_dir / target / f"{half_number}_224p.vtt"
-
-    #     with open(json_path, "r") as f:
-    #         json_data = json.load(f)
-
-    #     vtt_content = convert_to_vtt(json_data)
-
-    #     with open(vtt_path, "w") as f:
-    #         f.write(vtt_content)

@@ -134,8 +134,6 @@ def clean():
 
 
 def create_tokonized_all_csv():
-    half_number = 1
-
     df_list = []
     for target in Config.targets:
         target: str = target.rstrip("/").split("/")[-1]
