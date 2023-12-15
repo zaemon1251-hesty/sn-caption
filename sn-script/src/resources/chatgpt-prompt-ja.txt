@@ -1,56 +1,95 @@
 システム：
-与えられたテキストに付加的情報が含まれているかどうかを分類する。
-テキストはアナウンサーによるサッカーの試合解説である。
-付加的情報には、主観的な意見や推測、試合映像に見られる行動は含まれない。対して、現在および過去の試合、イベント、過去のインタビューから調査されたデータや統計が含まれる。
-出力はJSON形式で提供される。
-分類クラス 1 は付加的情報が含まれていることを表し、0 は含まれていないことを表す。
+与えられたサッカー実況のライブコメントに付加的情報が含まれているかどうかを分類し、jsonオブジェクトを返す。
+付加的情報には、選手の名前をつぶやくことや，試合映像から認識できるイベント・アクションの説明は含まれない。
+また，選手のパフォーマンスに関する実況者の主観的な意見や推測，議論も含まない．
+対して、現在および過去の試合、イベント、過去のインタビューから調査されたデータや統計が含まれる。
 
 - 1:
   user: |+
-    - comment => Still standing firm, 25 minutes gone, 0-0.
     - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
-    - previous_comments => Some good forwards here, was it the heel of Chambers that just took it away? => Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
+    - previous comments => Some good forwards here, was it the heel of Chambers that just took it away? => Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
+    - comment => Still standing firm, 25 minutes gone, 0-0.
   assistant: |
-    {"category": 1, "reason": "This comment contaions current game stats."}
+    {"reason": "This comment contaions current game stats.", "category": 1}
 - 2:
   user: |+
-    - comment => Sneijder.
     - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
-    - previous_comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
+    - previous comments => Thiago. Konke. Umut Bulut. Burak Yilmaz. Thiago.
+    - comment => Sneijder.
   assistant: |
-    {"category": 0, "reason": "This comment just refers a player who posses a ball."}
+    {"reason": "This comment just refers a player name.", "category": 0}
 - 3:
   user: |+
-    - comment => Six of them were free kicks.
     - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
-    - previous_comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
+    - previous comments => What an impact he can have. Is he who takes the corner kick? Wendel sends it back. It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
+    - comment => Six of them were free kicks.
   assistant: |
-    {"category": 1, "reason": "This comment contaions past person stats."}
+    {"reason": "This comment contaions past person stats.", "category": 1}
 - 5:
   user: |+
-    - comment => As a central defender, I don't know how Badr is under pressure.
     - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
-    - previous_comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
+    - previous comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air? But again, good, but actually Kaiser slipped away beforehand. And here it is not a free kick. The reds have already seen that correctly.
+    - comment => As a central defender, I don't know how Badr is under pressure.
   assistant: |
-    {"category": 0, "reason": "This comment just refers feeling of a commentator."}
+    {"reason": "This comment just refers feeling of a commentator.", "category": 0}
 - 6:
   user: |+
-    - comment: A terrific season as a Marseille player.
     - game: 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
-    - previous_comments: He then sprinted into the middle. It was too strong for Marquinhos at the far post. And Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marseille score from their first real opportunity.
+    - previous comments: He then sprinted into the middle. It was too strong for Marquinhos at the far post. And Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marseille score from their first real opportunity.
+    - comment: A terrific season as a Marseille player.
   assistant: |
-    {"category": 0, "reason": "This comment refers player's performance in last season but terrific is just a commentator's feeling"}
+    {"reason": "This comment refers player's performance in last season but terrific is just a commentator's feeling", "category": 0}
 - 7:
   user: |+
-    - comment: Two points for Malaga and two points for Barcelona.
     - game: 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
-    - previous_comments: 43-1. Real Madrid are very close to the league title. They're up 6 points from Barcelona. Barça are very close to the cup. Real Madrid have four points ahead of them.
+    - previous comments: 43-1. Real Madrid are very close to the league title. They're up 6 points from Barcelona. Barça are very close to the cup. Real Madrid have four points ahead of them.
+    - comment: Two points for Malaga and two points for Barcelona.
   assistant: |
-    {"category": 1, "reason": "This comment refers the standings of the teams."}
+    {"reason": "This comment refers the standings of the teams.", "category": 1}
 - 8:
   user: |+
-    - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
     - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
-    - previous_comments: With five remis and five defeats. André Breitenreiter said we turned the game around. The problem is today a whole three-time goal hall with a feeling of 30 boxes from the south of the republic. Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
+    - previous comments: With five remis and five defeats. André Breitenreiter said we turned the game around. The problem is today a whole three-time goal hall with a feeling of 30 boxes from the south of the republic. Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
+    - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
   assistant: |
-    {"category": 0, "reason": "This comment simply refers where the players is in the game."}
+    {"reason": "This comment simply refers the players' position in the pitch.", "category": 0}
+- 9:
+  user: |+
+    - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
+    - previous comments: But I would have liked the right defender to at least try to exert pressure on the Frenchman, who could then play relatively relaxed on Lewandowski.
+    - comment: Robben against Ziegler.
+  assistant: |
+    {"reason": "This comment just refers an action in the pitch.", "category": 0}
+- 10:
+  user: |+
+    - game: 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
+    - previous comments:  A long, long way away from France. But he did well. Pastore scored his first goal with Argentina.
+    - comment: And the Argentine is enjoying quite a renaissance at the moment.
+  assistant: |
+    {"reason": "This comment refers just a commentator's subjective view of the team.", "category": 0}
+- 11:
+  user: |+
+    - game: 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
+    - previous comments: The West Brom players. Led by Chris Brunt, who's one of the most experienced men. In words with Mark Clattenburg.
+    - comment: He's made it clear to Zuma that he saw what happened.
+  assistant: |
+    {"reason": "This comment refers a action in the pitch.", "category": 0}
+- 12:
+  user: |+
+    - game: 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
+    - previous_comments: He's in for Gary Cahill. And you have a bit of insight into Cahill's... Yes, just been speaking with him at the Chelsea camp and they said that Gary's been working all week with a protective mask on. Asmir Begovic caught him in the face at Manchester City and actually broke his nose and gave him a gash on the cheekbone. So it's not been a comfortable week's work for him.
+    - comment: So in some ways I'm sure that would have had a bearing on the Zouma decision as well.
+  assistant: |
+    {"reason": "This comment represents subjective opinion from commentator.", "category": 0}
+- 13:
+  - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
+  - previous comments: With five remis and five defeats. André Breitenreiter said we turned the game around. The problem is today a whole three-time goal hall with a feeling of 30 boxes from the south of the republic. Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
+  - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
+  assistant: |
+    {"reason": "This comment simply refers the players' position in the pitch.", "category": 0}
+- 14:
+  - game: 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
+  - previous comments: Xavi Martinez and Holger Babskoeber still injured. Kosta with the cross. Couldn't pick out Muller or Lewandowski on this occasion but he has been the greatest Bayern threat. Well again 1v1 he's so quick. Can't believe these Leverkusen defenders are trying to nip the ball off him.
+  - comment: I think they're just going to drop in and into shape and not allow that space to run into but something they'll have to adjust.
+  assistant: |
+    {"reason": "This comment represents commentator's opinion.", "category": 0}

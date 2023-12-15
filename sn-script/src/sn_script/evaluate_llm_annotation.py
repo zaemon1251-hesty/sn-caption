@@ -33,10 +33,12 @@ except ModuleNotFoundError:
 
 
 LLM_ANOTATION_CSV_PATH = (
-    Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+    Config.target_base_dir
+    / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
 )
 HUMAN_ANOTATION_CSV_PATH = (
-    Config.base_dir / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
+    Config.target_base_dir
+    / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
 )
 
 

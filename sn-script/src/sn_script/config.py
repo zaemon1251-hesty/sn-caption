@@ -23,11 +23,12 @@ subcategory_name = "小分類"
 
 # ターゲットの設定
 random_seed = 42
-half_number = 2
+half_number = 1
 
 # 使用するLLMのモデル名
-model_type = "gpt-3.5-turbo-1106"
-# model_type = "gpt-4-1106-preview"
+# model_type = "gpt-3.5-turbo-1106"
+model_type = "gpt-4-1106-preview"
+# model_type = "meta-llama/Llama-2-70b-chat-hf"
 
 if __name__ == "__main__":
     print(len(Config.targets))

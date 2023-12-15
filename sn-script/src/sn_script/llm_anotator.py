@@ -7,6 +7,10 @@ from collections import namedtuple
 import yaml
 from loguru import logger
 from datetime import datetime
+from transformers import AutoTokenizer
+import transformers
+import torch
+from pathlib import Path
 
 try:
     from sn_script.config import (
@@ -35,31 +39,47 @@ except ModuleNotFoundError:
 # プロンプト作成用の引数
 PromptArgments = namedtuple("PromptArgments", ["comment", "game", "previous_comments"])
 
-# APIキーの設定
-client = OpenAI(
-    api_key=os.environ["OPENAI_API_KEY"],
-)
 
-
-ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
+ALL_CSV_PATH = Config.target_base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
 ANNOTATION_CSV_PATH = (
-    Config.base_dir
+    Config.target_base_dir
     / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
 )
-PROMPT_YAML_PATH = (
-    Config.base_dir.parent / "sn-script" / "src" / "resources" / "classify_comment.yaml"
-)
+PROMPT_YAML_PATH = Config.target_base_dir.parent / "resources" / "classify_comment.yaml"
 
 LLM_ANOTATION_CSV_PATH = (
-    Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+    Config.target_base_dir
+    / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
 )
-
 
 # load csv
 all_comment_df = pd.read_csv(ALL_CSV_PATH)
+annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
 
 # load yaml
 prompt_config = yaml.safe_load(open(PROMPT_YAML_PATH, "r"))
+
+
+if model_type == "meta-llama/Llama-2-70b-chat-hf":
+    tokenizer = AutoTokenizer.from_pretrained(model_type)
+    pipeline = transformers.pipeline(
+        "text-generation",
+        model=model_type,
+        torch_dtype=torch.float16,
+        device_map="auto",
+    )
+
+    # APIキーの設定は無視する
+    client = None
+else:
+    # use openai chat api
+    tokenizer = None
+    pipeline = None
+
+    # APIキーの設定
+    client = OpenAI(
+        api_key=os.environ["OPENAI_API_KEY"],
+    )
 
 
 def main():
@@ -71,8 +91,6 @@ def main():
     logger.info(f"model_type:{model_type}")
     logger.info(f"random_seed:{random_seed}")
     logger.info(f"half_number:{half_number}")
-
-    annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
 
     def fill_category(row):
         comment_id = row["id"]
@@ -113,13 +131,15 @@ def main():
     )
     annotation_df.to_csv(LLM_ANOTATION_CSV_PATH, index=False)
 
-    # print(classify_comment(model_type, 833))
-    # # {'category': [1, 2], 'subcategory': [1.8, None]}
-
 
 def classify_comment(model_type: str, comment_id: int) -> dict:
     messages = get_messages(comment_id)
+    if model_type == "meta-llama/Llama-2-70b-chat-hf":
+        return _classify_comment_with_llama(messages)
+    return _classify_comment_with_openai(messages)
 
+
+def _classify_comment_with_openai(messages: list[str]) -> dict:
     completion_params = {
         "model": model_type,
         "messages": messages,
@@ -134,6 +154,29 @@ def classify_comment(model_type: str, comment_id: int) -> dict:
         return {}
     else:
         return json.loads(content)
+
+
+def _classify_comment_with_llama(messages: list[str]) -> dict:
+    # Concatenate all messages into a single string
+    input_text = " ".join([message["content"] for message in messages])
+
+    # Generate a response using the pipeline
+    response = pipeline(
+        input_text,
+        max_new_tokens=40,
+        num_return_sequences=1,
+        do_sample=True,
+        top_p=0.9,
+    )
+
+    response_text = response[0]["generated_text"] if response else None
+    logger.info(f"response_text:{response_text}")
+
+    # Process the response as needed
+    if response_text is None:
+        return {}
+    else:
+        return json.loads(response_text)
 
 
 def get_messages(comment_id: int) -> list[str]:
@@ -202,9 +245,9 @@ def _create_target_prompt(prompt_args: PromptArgments) -> str:
     """分類対象のコメントに関するプロンプトを作成する"""
 
     message = f"""
-- comment: {prompt_args.comment}
 - game: {prompt_args.game}
-- previous_comments: {" ".join(prompt_args.previous_comments)}
+- previous comments: {" ".join(prompt_args.previous_comments)}
+- comment: {prompt_args.comment}
 """
 
     return message

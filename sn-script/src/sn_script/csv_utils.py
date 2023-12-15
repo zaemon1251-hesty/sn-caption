@@ -151,6 +151,7 @@ def create_tokonized_all_csv():
                 "start",
                 "end",
                 "text",
+                binary_category_name,
                 category_name,
                 subcategory_name,
                 "備考",
@@ -196,5 +197,5 @@ def create_tokenized_annotation_csv(number_of_comments: int = 100):
 
 if __name__ == "__main__":
     # create_tokenized_annotation_csv()
-    output_label_statistics(LLM_ANOTATION_CSV_PATH, binary=True)
+    # output_label_statistics(LLM_ANOTATION_CSV_PATH, binary=True)
     # add_column_to_csv()
