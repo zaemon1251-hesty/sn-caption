@@ -48,6 +48,7 @@ DENISED_TOKENIZED_CSV_TEPMLATE = f"denoised_{half_number}_tokenized_224p.csv"
 
 @stop_watch
 def convert_json_to_csv():
+    """whisperが生成したjsonファイルをCSVに変換する"""
     for target in Config.targets:
         # target: str = target.rstrip("/").split("/")[-1]
         json_path = Config.base_dir / target / RAW_JSON_TEMPLATE
@@ -59,6 +60,8 @@ def convert_json_to_csv():
 
 @stop_watch
 def denoise_sentenses():
+    """whisperが生成したjsonに含まれるセグメントのうち，ノイズとなるセグメントを除去する"""
+
     def preprocess_data(sentenses_data: List[Dict[str, str]]):
         result = []
         for sts in sentenses_data:
@@ -107,6 +110,7 @@ def denoise_sentenses():
 
 @stop_watch
 def tokenize_sentense():
+    """試合単位で結合されたコメント集合を文単位にtokenizeする"""
     for target in Config.targets:
         # target: str = target.rstrip("/").split("/")[-1]
         denoised_txt_path = Config.base_dir / target / DENOISED_TEXT_TEMPLATE
@@ -119,6 +123,8 @@ def tokenize_sentense():
 
 @stop_watch
 def create_jsonline_tokenized_sentences():
+    """tokenized済みのテキストが含まれるファイルを，発話時間情報を付与しつつ，jsonline形式に変換する"""
+
     def _run(
         tokenized_txt_path: str, denoised_jsonl_path: str, tokenized_jsonl_path: str
     ):
@@ -202,6 +208,7 @@ def round_down():
 
 @stop_watch
 def create_csv_tokenized_sentenses():
+    """sentence tokenizedしたjsonlファイルをcsvに変換する"""
     for target in Config.targets:
         # target: str = target.rstrip("/").split("/")[-1]
         tokenized_jsonl_path = (
@@ -221,6 +228,7 @@ def create_csv_tokenized_sentenses():
 
 @stop_watch
 def create_tokonized_all_csv():
+    """全試合のコメントをまとめたCSVを作成する"""
     df_list = []
     for target in Config.targets:
         # target: str = target.rstrip("/").split("/")[-1]
