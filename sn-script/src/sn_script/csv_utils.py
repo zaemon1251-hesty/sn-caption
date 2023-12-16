@@ -1,8 +1,13 @@
+from __future__ import annotations
 import pandas as pd
 from collections import defaultdict
 from pathlib import Path
 import ast
 import pprint
+from functools import wraps
+import time
+from loguru import logger
+import csv
 
 try:
     from sn_script.config import (
@@ -14,7 +19,6 @@ try:
         half_number,
         model_type,
     )
-    from sn_script.json2csv import write_csv
 except ModuleNotFoundError:
     import sys
 
@@ -30,9 +34,13 @@ except ModuleNotFoundError:
     )
 
 HUMAN_ANOTATION_CSV_PATH = (
-    Config.base_dir / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
+    Config.target_base_dir
+    / f"{random_seed}_{half_number}_moriy_annotation_preprocessed.csv"
 )
-ALL_CSV_PATH = Config.base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
+ALL_CSV_PATH = (
+    Config.target_base_dir / f"500_denoised_{half_number}_tokenized_224p_all.csv"
+)
+
 DENISED_TOKENIZED_CSV_TEMPLATE = f"denoised_{half_number}_tokenized_224p.csv"
 
 ANNOTATION_CSV_PATH = (
@@ -42,6 +50,50 @@ ANNOTATION_CSV_PATH = (
 LLM_ANOTATION_CSV_PATH = (
     Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
 )
+
+
+def write_csv(data: dict | list, output_csv_path: str | Path):
+    """CSVファイルに変換"""
+
+    # JSONデータをPythonの辞書として読み込んだ場合、segmentsの中身だけを抽出する
+    if isinstance(data, dict):
+        data = data["segments"]
+
+    if not isinstance(data, list):
+        raise ValueError("data must be list or dict, but got {}".format(type(data)))
+    if output_csv_path.exists():
+        logger.info(f"CSVファイルが既に存在します。:{output_csv_path}")
+        return
+    with open(output_csv_path, "w", newline="", encoding="utf_8_sig") as csvfile:
+        writer = csv.writer(csvfile)
+        # ヘッダを書き込む
+        writer.writerow(
+            [
+                "id",
+                "start",
+                "end",
+                "text",
+                binary_category_name,
+                category_name,
+                subcategory_name,
+                "備考",
+            ]
+        )
+        # 各segmentから必要なデータを抽出してCSVに書き込む
+        for segment in data:
+            writer.writerow(
+                [
+                    segment["id"],
+                    seconds_to_gametime(segment["start"]),
+                    seconds_to_gametime(segment["end"]),
+                    segment["text"],
+                    "",
+                    "",
+                    "",
+                    "",
+                ]
+            )
+    logger.info(f"CSVファイルが生成されました。:{output_csv_path}")
 
 
 def output_label_statistics(csv_path: str | Path, binary: bool = False):
@@ -133,38 +185,6 @@ def clean():
     df.to_csv(DUMP_FILE_PATH, index=False)
 
 
-def create_tokonized_all_csv():
-    df_list = []
-    for target in Config.targets:
-        target: str = target.rstrip("/").split("/")[-1]
-        csv_path = Config.base_dir / target / DENISED_TOKENIZED_CSV_TEMPLATE
-        tmp_df = pd.read_csv(csv_path)
-        tmp_df["game"] = target.replace("SoccerNet/", "")
-        df_list.append(tmp_df)
-
-    all_game_df = pd.concat(df_list)
-    all_game_df = (
-        all_game_df.reindex(
-            columns=[
-                "id",
-                "game",
-                "start",
-                "end",
-                "text",
-                binary_category_name,
-                category_name,
-                subcategory_name,
-                "備考",
-            ]
-        )
-        .sort_values(by=["game", "start", "end"], ascending=[True, True, True])
-        .reset_index(drop=True)
-    )
-
-    all_game_df["id"] = all_game_df.index
-    all_game_df.to_csv(ALL_CSV_PATH, index=False, encoding="utf-8_sig")
-
-
 def add_column_to_csv():
     # all_game_df = pd.read_csv(ALL_CSV_PATH)
     annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
@@ -195,7 +215,25 @@ def create_tokenized_annotation_csv(number_of_comments: int = 100):
     annotation_df.to_csv(ANNOTATION_CSV_PATH, index=False, encoding="utf-8_sig")
 
 
+def stop_watch(func):
+    @wraps(func)
+    def wrapper(*args, **kargs):
+        start = time.time()
+        result = func(*args, **kargs)
+        elapsed_time = time.time() - start
+        logger.info(f"{func.__name__}は{elapsed_time}秒かかりました")
+        return result
+
+    return wrapper
+
+
+def seconds_to_gametime(seconds):
+    m, s = divmod(seconds, 60)
+    return f"{int(m):02}:{int(s):02}"
+
+
 if __name__ == "__main__":
     # create_tokenized_annotation_csv()
     # output_label_statistics(LLM_ANOTATION_CSV_PATH, binary=True)
     # add_column_to_csv()
+    pass
