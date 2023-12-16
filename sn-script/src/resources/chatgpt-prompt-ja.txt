@@ -82,9 +82,10 @@
   assistant: |
     {"reason": "This comment represents subjective opinion from commentator.", "category": 0}
 - 13:
-  - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
-  - previous comments: With five remis and five defeats. André Breitenreiter said we turned the game around. The problem is today a whole three-time goal hall with a feeling of 30 boxes from the south of the republic. Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
-  - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
+  user: |+
+    - game: 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
+    - previous comments: With five remis and five defeats. André Breitenreiter said we turned the game around. The problem is today a whole three-time goal hall with a feeling of 30 boxes from the south of the republic. Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
+    - comment: Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
   assistant: |
     {"reason": "This comment simply refers the players' position in the pitch.", "category": 0}
 - 14:
@@ -93,3 +94,24 @@
   - comment: I think they're just going to drop in and into shape and not allow that space to run into but something they'll have to adjust.
   assistant: |
     {"reason": "This comment represents commentator's opinion.", "category": 0}
+- 15:
+  user: |+
+    game: 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
+    previous comments: I think the necessity of the club is that they've got to win games straight away. I think that if they do lose today, it would come under some pressure, Arsene Wenger.
+    comment: Speaking to fans before the game, they certainly weren't coming into the ground on spy, I don't know whether you felt the same thing, Martin.
+  assistant: |
+    {"reason": "This comment refers numercal information of the current game", "category": 1}
+- 16:
+  user: |+
+    game: 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
+    previous comments: Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
+    comment: Still standing firm, 25 minutes gone, 0-0.
+  assistant: |
+    {"reason": "This comment refers numercal information of the current game.", "category": 1}
+  - 17:
+    user: |+
+      - game: 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
+      - previous comments: It is not effective. Rieto touched. Mustera. We will leave the first 15 minutes later. There is no clear position in both goals.
+      - comment: There is a moment when Atletico Madrid checks the goal twice.
+    assistant: |
+      {"reason": "This comment refers total number of specific events in current game.", "category": 1}
