@@ -1,11 +1,8 @@
 import nltk
 from typing import List, Dict
 import json
-from pathlib import Path
 from loguru import logger
-from tqdm import tqdm
 import pandas as pd
-import csv
 
 try:
     from sn_script.config import (
@@ -17,7 +14,7 @@ try:
         half_number,
         model_type,
     )
-    from sn_script.csv_utils import write_csv, seconds_to_gametime, stop_watch
+    from sn_script.csv_utils import write_csv, stop_watch
 except ModuleNotFoundError:
     import sys
 

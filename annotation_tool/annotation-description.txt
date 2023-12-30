@@ -1,14 +1,7 @@
 システム：
 与えられたサッカーの実況解説に付加的情報が含まれているかどうかを分類してください。
-付加的情報には、現在および過去の試合、イベント、過去のインタビューから調査したデータや数値情報、統計が含まれます。
+付加的情報には、現在および過去の試合のイベントの数値情報やデータ、および，資料や過去のインタビューなどの調査に基づく選手・チームの属性・性質が含まれます。
 
-- 1:
-  user: |+
-    - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
-    - previous comments => Some good forwards here, was it the heel of Chambers that just took it away? => Just there. It's an important touch. Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
-    - comment => Still standing firm, 25 minutes gone, 0-0.
-  assistant: |
-    {"reason": "This comment contaions current game stats.", "category": 1}
 - 2:
   user: |+
     - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid

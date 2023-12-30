@@ -1,13 +1,11 @@
 from __future__ import annotations
 import pandas as pd
-from collections import defaultdict
 from pathlib import Path
-import ast
-import pprint
 from functools import wraps
 import time
 from loguru import logger
 import csv
+import json
 
 try:
     from sn_script.config import (
@@ -43,13 +41,22 @@ ALL_CSV_PATH = (
 
 DENISED_TOKENIZED_CSV_TEMPLATE = f"denoised_{half_number}_tokenized_224p.csv"
 
-ANNOTATION_CSV_PATH = (
-    Config.base_dir
-    / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
-)
+# ANNOTATION_CSV_PATH = (
+#     Config.base_dir
+#     / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
+# )
+
+# LLM_ANOTATION_CSV_PATH = (
+#     Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+# )
+
 LLM_ANOTATION_CSV_PATH = (
-    Config.base_dir / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+    Config.target_base_dir / f"{model_type}_500game_{half_number}_llm_annotation.csv"
 )
+
+LLM_ANNOTATION_JSONL_PATH = (
+    Config.target_base_dir / f"{model_type}_500game_{half_number}_llm_annotation.jsonl"
+)  # ストリームで保存するためのjsonlファイル
 
 
 def write_csv(data: dict | list, output_csv_path: str | Path):
@@ -94,68 +101,6 @@ def write_csv(data: dict | list, output_csv_path: str | Path):
                 ]
             )
     logger.info(f"CSVファイルが生成されました。:{output_csv_path}")
-
-
-def output_label_statistics(csv_path: str | Path, binary: bool = False):
-    if binary:
-        label_counts = get_binary_categories_ratio(csv_path)
-        print(label_counts)
-        return
-
-    label_counts = get_categories_ratio(csv_path)
-    result = pprint.pformat(label_counts, depth=2, width=40, indent=2)
-    print(result)
-
-
-def get_binary_categories_ratio(csv_path: str | Path):
-    all_game_df = pd.read_csv(csv_path)
-    label_counts = {
-        binary_category_name: defaultdict(int),
-    }
-    for values in all_game_df[binary_category_name]:
-        label_counts[binary_category_name][values] += 1
-    return label_counts
-
-
-def get_categories_ratio(csv_path: str | Path):
-    all_game_df = pd.read_csv(csv_path)
-    filled_category_df = all_game_df
-    all_game_df[category_name] = all_game_df[category_name].apply(
-        lambda r: ast.literal_eval(r)
-    )
-    all_game_df[subcategory_name] = all_game_df[subcategory_name].apply(
-        lambda r: ast.literal_eval(r)
-    )
-
-    # 大分類はマルチラベルなので、大分類の数はデータ数よりも多い
-    # 大分類のマルチラベルを分割して数える
-
-    # ユニークラベルの数を数える
-    label_counts = {
-        category_name: defaultdict(int),
-        subcategory_name: defaultdict(int),
-    }
-
-    # Iterate over the  column
-    for column in [category_name, subcategory_name]:
-        for values in filled_category_df[column]:
-            # Split the value by space and strip extra spaces
-            assert isinstance(values, list)
-            for value in values:
-                labels = value
-                label_counts[column][labels] += 1
-
-    return label_counts
-
-
-def get_average_num_comments(half_number: int) -> int:
-    lens = []
-    for target in Config.targets:
-        target: str = target.rstrip("/").split("/")[-1]
-        csv_path = Config.base_dir / target / f"{half_number}_224p.csv"
-        tmp_df = pd.read_csv(csv_path)
-        lens.append(len(tmp_df))
-    return sum(lens) / len(lens)
 
 
 def dump_filled_comments(half_number: int):
@@ -232,8 +177,27 @@ def seconds_to_gametime(seconds):
     return f"{int(m):02}:{int(s):02}"
 
 
+def fill_csv_from_json():
+    annotation_df = pd.read_csv(LLM_ANOTATION_CSV_PATH)
+    annotation_df[binary_category_name] = pd.NA
+    annotation_df["備考"] = pd.NA
+
+    with open(LLM_ANNOTATION_JSONL_PATH, "r") as f:
+        for line in f:
+            result: dict = json.loads(line)
+            comment_id = result.get("comment_id")
+            category = result.get("category")
+            reason = result.get("reason")
+            annotation_df.loc[
+                annotation_df["id"] == comment_id, binary_category_name
+            ] = category
+            annotation_df.loc[annotation_df["id"] == comment_id, "備考"] = reason
+    annotation_df.to_csv(LLM_ANOTATION_CSV_PATH, index=False, encoding="utf-8_sig")
+
+
 if __name__ == "__main__":
     # create_tokenized_annotation_csv()
     # output_label_statistics(LLM_ANOTATION_CSV_PATH, binary=True)
     # add_column_to_csv()
+    fill_csv_from_json()
     pass

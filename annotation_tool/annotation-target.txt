@@ -2,498 +2,698 @@
 - game => 2014-11-04 - 20-00 Zenit Petersburg 1 - 2 Bayer Leverkusen
 - previous comments => Zidane! Let's go in there.
 - comment => You can definitely run up to Ludwig, who shows weaknesses more often in the game, the Russian goalkeeper.
+category =>
+note =>
 
 
 - game => 2014-11-04 - 20-00 Zenit Petersburg 1 - 2 Bayer Leverkusen
 - previous comments => The duel of the two Italians. On the right side of the Leverkusen, Giulio Donati and Domenico Crescito.
 - comment => So, and he is usually the better one at the Red Bull Nobel.
+category =>
+note =>
 
 
 - game => 2014-11-04 - 20-00 Zenit Petersburg 1 - 2 Bayer Leverkusen
 - previous comments => The topic is the balance, which is often missing. That was also seen here, when they move up wide.
 - comment => A good action from the guests, as now with Kershak.
+category =>
+note =>
 
 
 - game => 2015-02-14 - 20-00 Real Madrid 2 - 0 Dep. La Coruna
 - previous comments => There's always so many stories isn't there. It's not just about the three points.
 - comment => I mean Real Madrid in theory should be happy.
+category =>
+note =>
 
 
 - game => 2015-02-14 - 20-00 Real Madrid 2 - 0 Dep. La Coruna
 - previous comments => Real Madrid beginning to dominate over the last two minutes or so. It's one of those storms that Deportivo La Coruña will have to weather because now Real Madrid are finding their groove a bit.
 - comment => That shot against the crossbar will have boosted Real Madrid.
+category =>
+note =>
 
 
 - game => 2015-02-14 - 20-00 Real Madrid 2 - 0 Dep. La Coruna
 - previous comments => Isco out of bounds. A little knock there from Borges.
 - comment => Cruz.
+category =>
+note =>
 
 
 - game => 2015-02-14 - 20-00 Real Madrid 2 - 0 Dep. La Coruna
 - previous comments => Never played there and he's not well he might be matched but he's spent most of his time on the bench this season rather than playing. Attempting to move into a more managerial role.
 - comment => He's been taken under the wing by Victor Fernandez but he's going to be slightly off the pace whatever and you're going up against arguably the most potent strike force in all of the Liga if not Europe.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
 - previous comments => Rupp, Hünemeier, Hartherz. With possession of the ball the two outside defenders push into the middle field and support Bakalots and Rupp.
 - comment => Meaning Heinlot, the young man here on the ball and Hartherz on the other side.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
 - previous comments => Müller, chipped in for Lewandowski. Kacunga against Alaba.
 - comment => Heinlot.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 17-30 Paderborn 0 - 6 Bayern Munich
 - previous comments => This fake shot by Müller was difficult for Heinold, because the distance to Ribéry was very far. But I would have liked the right defender to at least try to exert pressure on the Frenchman, who could then play relatively relaxed on Lewandowski.
 - comment => Robben against Ziegler.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => Good pass. Courtois has finally settled it.
 - comment => Another loss.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => This player who interests Real Sociedad, and who should have good references, David Moyes. He should know him well, of course.
 - comment => The goalkeeper is in the box.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => Ivanovic. Ivanovic again.
 - comment => Ivanovic again, but the player is from Eden Hazard.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => He is a good player. Osk, do you have any comments about the Catalan player?
 - comment => In the disputes, the central defenders of the Vali are with their rear-view mirrors open.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => They haven't won yet as they're the smallest of scorers. Everything you can win by 1-0 is always very dangerous.
 - comment => Philippe for Oscar.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => It's a clear shot. This one is more obvious.
 - comment => Even a good referee can see it.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => He's closed the backline. It's a great cross from Servio.
 - comment => He's trying to surprise the Valcanico.
+category =>
+note =>
 
 
 - game => 2015-02-21 - 18-00 Chelsea 1 - 1 Burnley
 - previous comments => With Hazard. Diego Costa's manoeuvre to break the gap.
 - comment => He's been chased by Shaquille.
+category =>
+note =>
 
 
 - game => 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
 - previous comments => Zsigniak heads down. Djerdjaje.
 - comment => Florian Thauvin.
+category =>
+note =>
 
 
 - game => 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
 - previous comments => Six goals this season. 12 assists for the most creative player in the league this season.
 - comment => Mendy.
+category =>
+note =>
 
 
 - game => 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
 - previous comments => But he did well. Pastore scored his first goal with Argentina.
 - comment => And the Argentine is enjoying quite a renaissance at the moment.
+category =>
+note =>
 
 
 - game => 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
 - previous comments => Fanny with the clearance. David Luiz again.
 - comment => Going down.
+category =>
+note =>
 
 
 - game => 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
 - previous comments => Cleverly switching the play to Payet. Payet's cross, far post.
 - comment => Gignac arrives and Gignac scores!
+category =>
+note =>
 
 
 - game => 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
 - previous comments => Marcelo Bielsa vindicated in his team selection, picking Gignac ahead of Batshuayi. Marseille score from their first real opportunity.
 - comment => A terrific season as a Marseille player.
+category =>
+note =>
 
 
 - game => 2015-04-05 - 22-00 Marseille 2 - 3 Paris SG
 - previous comments => It was always going to be a concern for Bielsa. Thiago Silva.
 - comment => Marquinhos spotting a bit of space to run into.
+category =>
+note =>
 
 
 - game => 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
 - previous comments => of the baggies and the current champions. West Brom in the strikes.
 - comment => And this immediately is Callum McManaman finding Craig Dawson.
+category =>
+note =>
 
 
 - game => 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
 - previous comments => Asmir Begovic caught him in the face at Manchester City and actually broke his nose and gave him a gash on the cheekbone. So it's not been a comfortable week's work for him.
 - comment => So in some ways I'm sure that would have had a bearing on the Zouma decision as well.
+category =>
+note =>
 
 
 - game => 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
 - previous comments => Costa's picked himself back up. Ivanovic.
 - comment => And a break for Jakob.
+category =>
+note =>
 
 
 - game => 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
 - previous comments => Hasn't yet been a break in play. Pedro to Fabregas.
 - comment => Now Willian.
+category =>
+note =>
 
 
 - game => 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
 - previous comments => Led by Chris Brunt, who's one of the most experienced men. In words with Mark Clattenburg.
 - comment => He's made it clear to Zuma that he saw what happened.
+category =>
+note =>
 
 
 - game => 2015-08-23 - 15-30 West Brom 2 - 3 Chelsea
 - previous comments => Costa. Pedro.
 - comment => Gives it up for Morrison.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => Calhanoglu it is who takes. Alonso again getting to it first.
 - comment => What an impression he's made on Bayern and what a remarkable achievement it would be if he could produce that unprecedented fourth consecutive Bundesliga title.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => One of the goal scorers in midweek as they beat Lazio 3-0. Karim Bellarabi.
 - comment => It's a game that we brought you here on BT Sport and it was a stunning performance from Roger Schmid's side to see off the Italians from 1-0 down in the first leg.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => But another yellow card for Leverkusen. Another opportunity for Xabi Alonso to get forward and take a buy in free kick.
 - comment => Kiesling was back to deal with it.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => Well he won't find a better club and he won't find a better city. So a lot of the players at Bayern Munich used to say once you leave Bayern Munich you probably won't find a better club and that was often the case but I think there's only a handful of clubs you could ever go to.
 - comment => Manchester United or Manchester City.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => He just always pops up at the right time. No current Bayern player has scored more Bundesliga goals than Thomas Müller.
 - comment => Here he is looking to add to the 75.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => Well up to that point it was a relatively even game. I thought Leverkusen had done a good job but when you give Bayern a bit of space to play then they realise Leverkusen pressing so much.
 - comment => Great switch from Alonso.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => But I think Bayern Munich on the counter attack when they won the treble under Jupp Heynckes they played a lot on the counter attack in the big games. If you give these top players space to run in behind and create they're so lethal.
 - comment => Well if there was a vulnerability about Bayern last season domestically it was against the other sides near the top of the table.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => It's not the kind of quality that Çalhanoğlu had from a dead ball in a similar position. Eight Bundesliga goals last season for Çalhanoğlu.
 - comment => Six of them were free kicks.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 19-30 Bayern Munich 3 - 0 Bayer Leverkusen
 - previous comments => Well again 1v1 he's so quick. Can't believe these Leverkusen defenders are trying to nip the ball off him.
 - comment => I think they're just going to drop in and into shape and not allow that space to run into but something they'll have to adjust.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => He's behind. He's on the right wing.
 - comment => He's for Suarez.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => And there were no problems for Kamen in this case. Intensity.
 - comment => Intensity in the attack of the Barcelona football club.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => Because all the others are international. And many also.
 - comment => Several also from Malaga.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => Messi for the shot. Messi with rebound.
 - comment => He goes to the corner.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => The ball is taken from the bar. And now the foul.
 - comment => For Luis Enrique's team, there are two coaches, Roberto Rodríguez, who sit down a little.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => Francasio, Barrancas and Correchate included. The ball continues to be on the left side.
 - comment => Finally, Andres Iniesta is supported.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => It's a direct pass to Jordi Alba. Alba with Neymar, Roberto Rosales presses him.
 - comment => A shot that doesn't go anywhere good for Barça.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => Ball stopped for Barça. Messi.
 - comment => In the final sprint of the first half.
+category =>
+note =>
 
 
 - game => 2015-08-29 - 21-30 Barcelona 1 - 0 Malaga
 - previous comments => He had taken his place in the box. Messi.
 - comment => Iniesta.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => A chance for Atletico Madrid. But a quick ball for Bieto.
 - comment => Moussera.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => Very comfortable. Moussera controlled.
 - comment => Luciano Vieto.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => We will leave the first 15 minutes later. There is no clear position in both goals.
 - comment => There is a moment when Atletico Madrid checks the goal twice.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => He did it with the second shot. Sneijder couldn't take it.
 - comment => Rieto.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => He is using the position that excites the fans. Snyder is using it.
 - comment => Bessi Snyder made the middle.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => Burak is showing his face. I guess Jimenez was in contact with him.
 - comment => It doesn't matter.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => 54-46. Galatasaray.
 - comment => In 2010.
+category =>
+note =>
 
 
 - game => 2015-09-15 - 21-45 Galatasaray 0 - 2 Atl. Madrid
 - previous comments => Burak Yilmaz. Thiago.
 - comment => Sneijder.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => An innocent move for him, and a great opportunity so early on. Mignolet had a good starting position there.
 - comment => Went off his line for Sanchez.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => Challenged by Henderson. Pulled by Ramsey to Elneny.
 - comment => A bit of trading places there between those two.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => I think the necessity of the club is that they've got to win games straight away. I think that if they do lose today, it would come under some pressure, Arsene Wenger.
 - comment => Speaking to fans before the game, they certainly weren't coming into the ground on spy, I don't know whether you felt the same thing, Martin.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => Without Murtosaka, Koselnick, they'd be vulnerable on set-pieces. These are always awkward to defend.
 - comment => Still standing firm, 25 minutes gone, 0-0.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => Big celebrations from Liverpool. Minilay, the perfect penalty height, it's a poor one from Theo Wook up.
 - comment => Keepers love it at that height.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => Wins the header too. Mane.
 - comment => Arsenal's confidence at the moment, both the holding midfield players were pushing up to join in the attack.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => It hasn't been very conspicuous in the first third of the game. Liverpool give themselves a chance to play with confidence.
 - comment => Liverpool lead to Barcelona.
+category =>
+note =>
 
 
 - game => 2016-08-14 - 18-00 Arsenal 3 - 4 Liverpool
 - previous comments => Some Premier League managers don't get 50 games in total. Confirmation of that booking for Francis Coquelain.
 - comment => Alberto Moreno.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => The transfer window is not closed yet. We are waiting for Fiorentina and Juventus' transfer.
 - comment => I think Juventus' transfer is more important.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => They stopped the match. He passed the ball.
 - comment => Kielin.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => The designer of the Florentine attack. Paolo Di Balla will serve.
 - comment => Di Balla plays the ball to Dani Alves.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => It seems that he is a little worried. The first match is officially declared for him.
 - comment => He won the Champions League several times.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => Bannucci. Barzali, Bannucci, Keline.
 - comment => I never doubted that Juventus would win.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => Allegri's forecast is that Dybala will be one of the three best footballers in the world in the next few years. If we know that the two best footballers in the world in the last 10 years are Messi and Ronaldo, then, apparently, Dybala should be the third.
 - comment => Although I think there are other contenders.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => You know, Chiesa leaves a very pleasant impression. As if this is not his first game in the Italian series, but some kind of tradition to come to Juventus Stadium and torture the defenders of the Italian national team for Federico Chiesa.
 - comment => Massimiliano Allegri.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => So far, in this season, half an hour after the first game. And so far 0-0 Juventus-Fiorentina.
 - comment => Petrushan has to score again.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => That Juventus was able to buy out Roma. But on the other hand, in the rest, young Lemina.
 - comment => Undoubtedly, he is qualified for the most important role.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => Pass to the left flank. Dybala.
 - comment => Dybala again with the ball.
+category =>
+note =>
 
 
 - game => 2016-08-20 - 18-00 Juventus 2 - 1 Fiorentina
 - previous comments => Teterushano had the European Championship in the Romanian national team. Not the best, although Teterushano played well.
 - comment => At least many remember his saves in the match against France.
+category =>
+note =>
 
 
 - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
 - previous comments => Demme, good ball. Kaiser, Werner.
 - comment => But that's how it can also go.
+category =>
+note =>
 
 
 - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
 - previous comments => The defensive player Christoph Metzeler asks. And Pausen asks again, but there was nothing.
 - comment => So, okay, I think that's standard now, although everyone else saw that there was something.
+category =>
+note =>
 
 
 - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
 - previous comments => Once again Werner, the flags go up when he goes there. That's again under the motto, should I dissolve myself in the air?
 - comment => But again, good, but actually Kaiser slipped away beforehand.
+category =>
+note =>
 
 
 - game => 2016-09-10 - 19-30 RB Leipzig 1 - 0 Dortmund
 - previous comments => And here it is not a free kick. The reds have already seen that correctly.
 - comment => As a central defender, I don't know how Badr is under pressure.
+category =>
+note =>
 
 
 - game => 2017-01-21 - 19-00 Nantes 0 - 2 Paris SG
 - previous comments => So, Renan who seems to have a little problem with us. The game that continues.
 - comment => Yassine Bamou for the center in the direction of Salah.
+category =>
+note =>
 
 
 - game => 2017-01-21 - 19-00 Nantes 0 - 2 Paris SG
 - previous comments => There may be small control problems. We'll see that now.
 - comment => No, because it's cut by Leo Dubois.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => Real Madrid now have a huge lead in the league title. But there's still a lot of time left.
 - comment => The championship is very exciting.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => Isco is helping. The game for Madrid is under control.
 - comment => Malaga are trying to put pressure on them.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => Marcelo is offside. He's got a ball in.
 - comment => It's perfect for Isco.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => The game has changed. Madrid are quickly and easily in the lead.
 - comment => Malaga's pressure is going down to the floor to get the ball out for Mikel.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => Fornals are up. There's no offside.
 - comment => Danilo's fallen asleep.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => He's looking for the shot. Malaga's first.
 - comment => He's caught the ball.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => Barça are very close to the cup. Real Madrid have four points ahead of them.
 - comment => Two points for Malaga and two points for Barcelona.
+category =>
+note =>
 
 
 - game => 2017-05-21 - 21-00 Malaga 0 - 2 Real Madrid
 - previous comments => There are important offside plays. But the offside manoeuvre is that Sandro... That's what I was going to say.
 - comment => ...doesn't participate in the play.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => Another free-kick. Denis wants more.
 - comment => He passes it to Casemiro to pick up the ball.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => Especially at full speed. More than a passing speed.
 - comment => A wonderful pass from Denis.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => Benzema about to cushion that ball. I think the ball came out to go back in after Ruben Blanco's block.
 - comment => So it will be a goal kick.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => It's Karim Benzema's goal. In the beginning, Vinicius' shot could have appeared.
 - comment => The assist is from Gareth Bale.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => Araujo. Good maneuver by Brais, he is facing Casemiro, pass with a pipe included.
 - comment => Denis, more from Brais, Brais in the first, the bull does not arrive, the rebound can favor Aspas.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => Real Madrid is very involved in the game. Conversations inside and outside the field, because they also had them, we saw it there in that section of the stands, as well as Mallo and Santimina, two players that surely Franescriba would like to have available today.
 - comment => Modric got into a trap, he wanted to get out of it, provoking a corner.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => It will be a draw. A draw for what Marc has pointed out the assistant.
 - comment => Well, no, it was finally Marcelo's hand.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => Denis wants to make a mess. Again, Odriozola.
 - comment => Lobotka, pressed by Kroos.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => Ruben Blanco. Madrid worked well.
 - comment => He's in a hurry to get Ruben.
+category =>
+note =>
 
 
 - game => 2019-08-17 - 18-00 Celta Vigo 1 - 3 Real Madrid
 - previous comments => He's got it. He chooses the shortstop, Thibaut Courtois.
 - comment => He's got it again.
+category =>
+note =>

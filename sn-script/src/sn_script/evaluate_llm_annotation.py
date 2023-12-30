@@ -193,7 +193,6 @@ class EvaluateAnnotationSingle(EvaluateAnnotationBase):
     def _calculate(self, col_name) -> EvalIndicator:
         references = self.llm_human_df[col_name + "_human"].tolist()
         predictioins = self.llm_human_df[col_name + "_llm"].tolist()
-
         fp = [
             self.llm_human_df.iloc[i]["id"]
             for i, (ref, pred) in enumerate(zip(references, predictioins))

@@ -22,20 +22,23 @@ LOCAL_DIRECTORY = os.environ.get(
 
 def main():
     mySNdl = SNdl(LocalDirectory=LOCAL_DIRECTORY)
-    # mySNdl.password = PASSWORD
+    mySNdl.password = PASSWORD
     game_list = getListGames("all")
     target_games = []
     for target in Config.targets:
         target_games.append(target.strip().rstrip("/"))
     target_ids = [i for i, game in enumerate(game_list) if game in target_games]
 
+    print(f"Target ids are {target_ids}.")
     for target_id in target_ids:
         mySNdl.LocalDirectory = LOCAL_DIRECTORY
+        print(f"Downloading {game_list[target_id]}...")
+        print(game_list[target_id] in getListGames("all"))
         mySNdl.downloadGameIndex(
             target_id,
             files=[
-                # "1_720p.mkv",
-                # "2_720p.mkv",
+                "1_720p.mkv",
+                "2_720p.mkv",
                 "Labels-caption.json",
                 "Labels.json",
                 "Labels-v2.json",

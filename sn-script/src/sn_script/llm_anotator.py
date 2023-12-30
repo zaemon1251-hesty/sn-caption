@@ -10,7 +10,8 @@ from datetime import datetime
 from transformers import AutoTokenizer
 import transformers
 import torch
-from pathlib import Path
+from tqdm import tqdm
+
 
 try:
     from sn_script.config import (
@@ -36,31 +37,46 @@ except ModuleNotFoundError:
         model_type,
     )
 
+# pandasのprogress_applyを使うために必要
+tqdm.pandas()
+
+
 # プロンプト作成用の引数
 PromptArgments = namedtuple("PromptArgments", ["comment", "game", "previous_comments"])
 
 
-ALL_CSV_PATH = Config.target_base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
-ANNOTATION_CSV_PATH = (
-    Config.target_base_dir
-    / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
+# ALL_CSV_PATH = Config.target_base_dir / f"denoised_{half_number}_tokenized_224p_all.csv"
+ALL_CSV_PATH = (
+    Config.target_base_dir / f"500game_denoised_{half_number}_tokenized_224p_all.csv"
 )
+# ANNOTATION_CSV_PATH = (
+#     Config.target_base_dir
+#     / f"{random_seed}_denoised_{half_number}_tokenized_224p_annotation.csv"
+# )
 PROMPT_YAML_PATH = Config.target_base_dir.parent / "resources" / "classify_comment.yaml"
 
+# LLM_ANOTATION_CSV_PATH = (
+#     Config.target_base_dir
+#     / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+# )
+
 LLM_ANOTATION_CSV_PATH = (
-    Config.target_base_dir
-    / f"{model_type}_{random_seed}_{half_number}_llm_annotation.csv"
+    Config.target_base_dir / f"{model_type}_500game_{half_number}_llm_annotation.csv"
 )
 
-# load csv
-all_comment_df = pd.read_csv(ALL_CSV_PATH)
-annotation_df = pd.read_csv(ANNOTATION_CSV_PATH)
+LLM_ANNOTATION_JSONL_PATH = (
+    Config.target_base_dir / f"{model_type}_500game_{half_number}_llm_annotation.jsonl"
+)  # ストリームで保存するためのjsonlファイル
 
+all_comment_df = pd.read_csv(ALL_CSV_PATH)
+# annotation_df = pd.read_csv(ANNOTATION_CSV_PATH).head(10)
+annotation_df = pd.read_csv(LLM_ANOTATION_CSV_PATH)
 # load yaml
 prompt_config = yaml.safe_load(open(PROMPT_YAML_PATH, "r"))
 
 
 if model_type == "meta-llama/Llama-2-70b-chat-hf":
+    # use local llama model
     tokenizer = AutoTokenizer.from_pretrained(model_type)
     pipeline = transformers.pipeline(
         "text-generation",
@@ -69,14 +85,12 @@ if model_type == "meta-llama/Llama-2-70b-chat-hf":
         device_map="auto",
     )
 
-    # APIキーの設定は無視する
     client = None
 else:
-    # use openai chat api
     tokenizer = None
     pipeline = None
 
-    # APIキーの設定
+    # use openai api
     client = OpenAI(
         api_key=os.environ["OPENAI_API_KEY"],
     )
@@ -111,23 +125,31 @@ def main():
     def fill_category_binary(row):
         comment_id = row["id"]
         if not pd.isnull(row[binary_category_name]):
-            return row[binary_category_name]
+            return row[binary_category_name], row["備考"]
         try:
             result = classify_comment(model_type, comment_id)
-            logger.info(f"comment_id:{comment_id},result:{result}")
             category = result.get("category")
-            logger.info(f"comment_id={comment_id} is annotated.")
-            return category
+            reason = result.get("reason")
+
+            # jsonl形式で保存する
+            with open(LLM_ANNOTATION_JSONL_PATH, "a") as f:
+                result["comment_id"] = comment_id
+                json.dump(result, f)
+                f.write("\n")
+
+            return category, reason
         except Exception as e:
             logger.error(f"comment_id={comment_id} couldn't be annotated.")
             logger.error(e)
-            return None
+            return None, None
 
     # annotation_df[[category_name, subcategory_name]] = annotation_df.apply(
     #     lambda r: fill_category(r), axis=1, result_type="expand"
     # )
-    annotation_df[binary_category_name] = annotation_df.apply(
-        lambda r: fill_category_binary(r), axis=1
+    annotation_df[[binary_category_name, "備考"]] = annotation_df.progress_apply(
+        lambda r: fill_category_binary(r),
+        axis=1,
+        result_type="expand",
     )
     annotation_df.to_csv(LLM_ANOTATION_CSV_PATH, index=False)
 
@@ -148,12 +170,16 @@ def _classify_comment_with_openai(messages: list[str]) -> dict:
         "temperature": 0.0,
         "response_format": {"type": "json_object"},
     }
-    response = client.chat.completions.create(**completion_params)
-    content = response.choices[0].message.content
-    if content is None:
+    try:
+        response = client.chat.completions.create(**completion_params)
+        content = response.choices[0].message.content
+        if content is None:
+            return {}
+        else:
+            return json.loads(content)
+    except Exception as e:
+        logger.error(e)
         return {}
-    else:
-        return json.loads(content)
 
 
 def _classify_comment_with_llama(messages: list[str]) -> dict:
@@ -245,9 +271,9 @@ def _create_target_prompt(prompt_args: PromptArgments) -> str:
     """分類対象のコメントに関するプロンプトを作成する"""
 
     message = f"""
-- game: {prompt_args.game}
-- previous comments: {" ".join(prompt_args.previous_comments)}
-- comment: {prompt_args.comment}
+- game => {prompt_args.game}
+- previous comments => {" ".join(prompt_args.previous_comments)}
+- comment => {prompt_args.comment}
 """
 
     return message
@@ -262,7 +288,7 @@ if __name__ == "__main__":
         / "sn-script"
         / "src"
         / "resources"
-        / f"{random_seed}_{half_number}_target_prompt.csv"
+        / f"{random_seed}_{half_number}_target_prompt.txt"
     )
 
     def output_target_prompt():
