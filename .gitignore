@@ -1,0 +1,13 @@
+wandb
+**/__pycache__
+*.log
+SoccerNet
+.vscode/**
+.DS_Store
+**/models/**
+data/**
+annotation_tool
+sn-script/*
+!sn-script/README.md
+**/logs/**
+.venv

@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "temporallyawarepooling"
+version = "0.1.0"
+description = ""
+authors = ["Yuichiro Mori <hisakawa1251@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+torch = "^2.0.1"
+torchvision = "^0.15.2"
+torchtext = "^0.15.2"
+soccernet = "^0.1.51"
+matplotlib = "^3.7.1"
+sklearn = "^0.0.post5"
+spacy = "^3.5.3"
+wandb = "^0.15.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
