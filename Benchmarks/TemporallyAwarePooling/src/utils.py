@@ -440,14 +440,20 @@ if __name__ == "__main__":
     import warnings
 
     class Args(tap.Tap):
-        type: Optional[Literal["spotting", "commentary"]] = "spotting"
-        fixed_interval: int = 59
+        type: Optional[Literal["spotting", "commentary", "commentary_gold"]] = (
+            "spotting"
+        )
+        fixed_interval: Optional[int] = None
         fixed_interval_2: Optional[int] = None
 
     args = Args().parse_args()
 
     if args.type == "spotting":
         # evaluate naive spotting
+        assert (
+            args.fixed_interval is not None
+        ), "fixed_interval is required for spotting"
+
         split = "test"
         fixed_interval = args.fixed_interval
         algo_name = f"naive_fixed_interval_{fixed_interval}"
@@ -480,9 +486,9 @@ if __name__ == "__main__":
     elif args.type == "commentary":
         from dataset import CommentaryClipsTesting
 
-        assert (
+        assert (args.fixed_interval is not None) and (
             args.fixed_interval_2 is not None
-        ), "fixed_interval_2 is required for commentary"
+        ), "both fixed_interval and fixed_interval_2 are required for commentary"
 
         split = "test"
         fixed_interval_1 = args.fixed_interval
@@ -551,3 +557,33 @@ if __name__ == "__main__":
             )
             pprint.pprint(results)
             print("##################")
+
+    elif args.type == "commentary_gold":
+        from dataset import CommentaryClipsTesting
+
+        """
+        testデータのラベルを使から、教師 results_spotting.json を生成する
+        """
+        func = generate_naive_spotting_prediction_json
+        SoccerNet_path = "/raid_elmo/home/lr/moriy/SoccerNet"
+        split = "test"
+        commentary_dataset = CommentaryClipsTesting(
+            path=SoccerNet_path,
+            split=split,
+            framerate=1,
+            features="baidu_soccer_embeddings.npy",
+        )
+        for i in range(len(commentary_dataset)):
+            (game, feat_half1, feat_half2, label_half1, label_half2) = (
+                commentary_dataset[i]
+            )
+            save_path = os.path.join(
+                os.environ.get("MODEL_DIR"),
+                "models",
+                "commentary_gold",
+                f"outputs/{split}",
+                game,
+                "results_spotting.json",
+            )
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            func(game, [label_half1, label_half2], save_path)
