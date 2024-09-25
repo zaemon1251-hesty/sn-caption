@@ -844,31 +844,123 @@ class CommentaryClipsTesting(Dataset):
         return len(self.listGames)
 
 
+class CommentaryClipsForDiffEstimation(Dataset):
+    """
+    直前の発話終了(開始)時間を考慮したデータセット
+    """
+
+    def __init__(
+        self,
+        path,
+        split="train",
+    ):
+        assert isinstance(split, str), "split should be a string"
+        assert split in [
+            "train",
+            "valid",
+            "test",
+        ], "split should be either 'train' or 'valid'"
+
+        self.path = path
+
+        label_template = "commentary_dataset/gpt-3.5-turbo-1106_500game_{half_nunber}_llm_annotation_{split}.csv"
+
+        self.label_df_half1 = pd.read_csv(
+            os.path.join(self.path, label_template.format(half_nunber=1, split=split))
+        )
+        self.label_df_half2 = pd.read_csv(
+            os.path.join(self.path, label_template.format(half_nunber=2, split=split))
+        )
+
+        # TODO データ準備の時点で対処すべき
+        self.label_df_half1 = self.label_df_half1.dropna(subset=["target_label"])
+        self.label_df_half2 = self.label_df_half2.dropna(subset=["target_label"])
+
+        # TODO データ準備の時点で対処すべき
+        games_half1 = self.label_df_half1["game"].unique().tolist()
+        games_half2 = self.label_df_half2["game"].unique().tolist()
+        list_games = list(set(games_half1) & set(games_half2))
+
+        self.listGames = list_games
+
+        self.num_classes = 2  # 映像の説明, 付加的情報
+
+        logging.info("Pre-compute clips")
+
+        self.data = []
+
+        for game in tqdm(self.listGames):
+            # filter labels by game
+            label_df_half1_by_game: pd.DataFrame = self.label_df_half1[
+                self.label_df_half1["game"] == game
+            ].sort_values("target_frameid")
+            label_df_half2_by_game: pd.DataFrame = self.label_df_half2[
+                self.label_df_half2["game"] == game
+            ].sort_values("target_frameid")
+
+            # 直前の発話開始フレームを self.prev_dataに入れて
+            # 現在の発話開始フレーム, class を self.current_dataに入れる
+            for i, row in enumerate(label_df_half1_by_game.itertuples()):
+                # 最初の行は無視
+                if i == 0:
+                    continue
+                previous_frameid = label_df_half1_by_game.iloc[i - 1]["target_frameid"]
+                target_frameid = row.target_frameid
+                target_label = row.target_label
+
+                self.data.append((game, previous_frameid, target_frameid, target_label))
+
+            for i, row in enumerate(label_df_half2_by_game.itertuples()):
+                # 最初の行は無視
+                if i == 0:
+                    continue
+                previous_frameid = label_df_half2_by_game.iloc[i - 1]["target_frameid"]
+                target_frameid = row.target_frameid
+                target_label = row.target_label
+
+                self.data.append((game, previous_frameid, target_frameid, target_label))
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+        Returns:
+            end_time[index-1] (int): 直前の発話終了時間
+            start_time[index] (int): 現在の発話開始時間
+        """
+        # self.data[index] = [game_name, previous_frameid, target_frameid, target_label]
+        # game_nameは使わない
+        return self.data[index][1:]
+
+    def __len__(self):
+        return len(self.data)
+
+
 if __name__ == "__main__":
 
     torch.manual_seed(0)
     np.random.seed(0)
-    root = "/raid_elmo/home/lr/moriy/SoccerNet/"
+    root = "/Users/heste/workspace/soccernet/sn-script"
 
-    dataset_Train = SoccerNetCaptions(
-        path=root,
-        features="baidu_soccer_embeddings.npy",
-        split=["train"],
-        version=2,
-        framerate=2,
-        window_size=15,
-    )
-    print(f"{dataset_Train.vocab_size=}")
+    # dataset_Train = SoccerNetCaptions(
+    #     path=root,
+    #     features="baidu_soccer_embeddings.npy",
+    #     split=["train"],
+    #     version=2,
+    #     framerate=2,
+    #     window_size=15,
+    # )
+    # print(f"{dataset_Train.vocab_size=}")
 
-    dataset_Test = SoccerNetCaptions(
-        path=root,
-        features="baidu_soccer_embeddings.npy",
-        split=["test"],
-        version=2,
-        framerate=2,
-        window_size=15,
-    )
-    print(f"{dataset_Test.vocab_size=}")
+    # dataset_Test = SoccerNetCaptions(
+    #     path=root,
+    #     features="baidu_soccer_embeddings.npy",
+    #     split=["test"],
+    #     version=2,
+    #     framerate=2,
+    #     window_size=15,
+    # )
+    # print(f"{dataset_Test.vocab_size=}")
     # test_loader = torch.utils.data.DataLoader(
     #     dataset_Test,
     #     batch_size=1,
@@ -881,3 +973,25 @@ if __name__ == "__main__":
     # print(feats, caption)
     # print(test_loader.dataset.detokenize([55, 22, 33, 2]))
     # print(idx)
+    dataset_Test = CommentaryClipsForDiffEstimation(
+        path=root,
+        split="test",
+    )
+
+    def predict_diff_and_label(previous_frameid):
+        mean_silence_sec = 4.9
+        fps = 1
+        label_space = [1, 2]
+        label_prob = [0.87, 0.13]
+
+        next_frameid = previous_frameid + int(mean_silence_sec * fps)
+        next_label = np.random.choice(label_space, p=label_prob)
+        return (next_frameid, next_label)
+
+    for i, (previous_frameid, target_frameid, target_label) in enumerate(dataset_Test):
+        next_frameid, label = predict_diff_and_label(previous_frameid)
+        print(
+            f"previous_frameid: {previous_frameid}, target_frameid: {target_frameid}, target_label: {target_label}, next_frameid: {next_frameid}, label: {label}"
+        )
+        if i == 10:
+            break
