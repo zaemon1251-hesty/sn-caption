@@ -925,7 +925,7 @@ class CommentaryClipsForDiffEstimation(Dataset):
         Args:
             index (int): Index
         Returns:
-            end_time[index-1] (int): 直前の発話終了時間
+            end_time[index-1] (int): 直前の発話開始時間
             start_time[index] (int): 現在の発話開始時間
         """
         # self.data[index] = [game_name, previous_frameid, target_frameid, target_label]
@@ -979,19 +979,44 @@ if __name__ == "__main__":
     )
 
     def predict_diff_and_label(previous_frameid):
-        mean_silence_sec = 4.9
+        mean_silence_sec = 4.9  # 平均的な発話間隔
         fps = 1
-        label_space = [1, 2]
-        label_prob = [0.87, 0.13]
+        label_space = [1, 2]  # 映像の説明, 付加的情報
+        label_prob = [0.87, 0.13]  # 全体のラベル割合分布
 
         next_frameid = previous_frameid + int(mean_silence_sec * fps)
         next_label = np.random.choice(label_space, p=label_prob)
         return (next_frameid, next_label)
 
-    for i, (previous_frameid, target_frameid, target_label) in enumerate(dataset_Test):
-        next_frameid, label = predict_diff_and_label(previous_frameid)
-        print(
-            f"previous_frameid: {previous_frameid}, target_frameid: {target_frameid}, target_label: {target_label}, next_frameid: {next_frameid}, label: {label}"
-        )
-        if i == 10:
-            break
+    def evaluate_diff_and_label(dataset, predict_model):
+        result_dict = {
+            "diff": [],
+            "label_same": [],
+            "predict_label": [],
+            "target_label": [],
+        }
+        for previous_frameid, target_frameid, target_label in dataset:
+            next_frameid, predict_label = predict_model(previous_frameid)
+            diff = abs(next_frameid - target_frameid)
+            label_result = 1 if predict_label == target_label else 0
+            result_dict["diff"].append(int(diff))
+            result_dict["label_same"].append(int(label_result))
+            result_dict["predict_label"].append(int(predict_label))
+            result_dict["target_label"].append(int(target_label))
+
+        # save result dict json
+        with open(
+            "/Users/heste/workspace/soccernet/sn-script/database/test/result.json", "w"
+        ) as f:
+            json.dump(result_dict, f, ensure_ascii=False, indent=4)
+
+        # calculate diff average
+        diff_average = np.mean(result_dict["diff"])
+        print(f"diff_average: {diff_average}")
+
+        # calculate label accuracy
+        label_accuracy = np.mean(result_dict["label_same"])
+        print(f"label_accuracy: {label_accuracy}")
+        return
+
+    evaluate_diff_and_label(dataset_Test, predict_diff_and_label)
