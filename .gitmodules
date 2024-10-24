@@ -1,0 +1,3 @@
+[submodule "Benchmarks/TemporallyAwarePooling"]
+	path = Benchmarks/TemporallyAwarePooling
+	url = ../TemporallyAwarePooling
