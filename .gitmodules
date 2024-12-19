@@ -1,3 +1,6 @@
 [submodule "Benchmarks/TemporallyAwarePooling"]
 	path = Benchmarks/TemporallyAwarePooling
 	url = ../TemporallyAwarePooling
+[submodule "Benchmarks/VitLstm"]
+	path = Benchmarks/VitLstm
+	url = git@github.com:zaemon1251-hesty/VitLstm.git
